@@ -6,9 +6,15 @@
 
   // ---------------- Scroll offset (header fixo, 2 linhas) ----------------
   var siteHeader = document.querySelector('.site-header');
+  var siteFooter = document.querySelector('.site-footer');
   function updateScrollOffset() {
     if (!siteHeader) return;
-    root.style.scrollPaddingTop = (siteHeader.offsetHeight + 12) + 'px';
+    var offset = siteHeader.offsetHeight + 12;
+    root.style.scrollPaddingTop = offset + 'px';
+    // Garante espaço suficiente abaixo da última seção (Contato) para que
+    // ela consiga rolar até ficar colada no header — sem isso, o navegador
+    // bate no fim da página antes de completar o ajuste.
+    if (siteFooter) siteFooter.style.paddingBottom = offset + 'px';
   }
   updateScrollOffset();
   window.addEventListener('resize', updateScrollOffset);
@@ -25,20 +31,32 @@
     if (sets.length < 3) return;
 
     var CAROUSEL_BREAKPOINT = 960;
-    var SPEED = 0.55;
+    var SPEED = 0.9;
     var RESUME_DELAY = 3000;
     var setWidth = 0;
-    var paused = false;
-    var resumeTimer = null;
+    // Em vez de um par de flags "pausado/retomado" dependente de touchstart
+    // sempre casar com touchend (o que falha em alguns navegadores mobile,
+    // deixando o carrossel travado pra sempre), guardamos só o instante da
+    // última interação e recalculamos "está pausado?" a cada quadro — assim
+    // ele sempre se autorrecupera 3s depois da última interação real, não
+    // importa se algum evento de "soltar" não disparar.
+    var lastInteraction = 0;
 
     function isCarouselActive() {
       return window.innerWidth < CAROUSEL_BREAKPOINT;
     }
+    function isPaused() {
+      return lastInteraction > 0 && (Date.now() - lastInteraction) < RESUME_DELAY;
+    }
+    function markInteraction() {
+      lastInteraction = Date.now();
+    }
 
     function measure() {
-      setWidth = sets[0].offsetWidth;
-      if (setWidth > 0 && isCarouselActive()) {
-        navScroll.scrollLeft = setWidth;
+      var w = sets[0].offsetWidth;
+      if (w > 0) {
+        setWidth = w;
+        if (isCarouselActive()) navScroll.scrollLeft = setWidth;
       }
     }
 
@@ -49,30 +67,26 @@
     }
 
     function tick() {
-      if (isCarouselActive() && !paused) {
-        navScroll.scrollLeft += SPEED;
-        wrap();
-      }
+      try {
+        if (isCarouselActive() && !isPaused()) {
+          navScroll.scrollLeft += SPEED;
+          wrap();
+        }
+      } catch (e) { /* nunca deixa um erro pontual matar o loop */ }
       requestAnimationFrame(tick);
     }
 
-    function pause() {
-      paused = true;
-      if (resumeTimer) { clearTimeout(resumeTimer); resumeTimer = null; }
-    }
-    function scheduleResume() {
-      if (resumeTimer) clearTimeout(resumeTimer);
-      resumeTimer = setTimeout(function () { paused = false; }, RESUME_DELAY);
-    }
-
-    navScroll.addEventListener('pointerdown', pause);
-    navScroll.addEventListener('touchstart', pause, { passive: true });
-    navScroll.addEventListener('pointerup', scheduleResume);
-    navScroll.addEventListener('touchend', scheduleResume, { passive: true });
-    navScroll.addEventListener('touchcancel', scheduleResume, { passive: true });
+    navScroll.addEventListener('pointerdown', markInteraction);
+    navScroll.addEventListener('touchstart', markInteraction, { passive: true });
+    navScroll.addEventListener('touchmove', markInteraction, { passive: true });
+    navScroll.addEventListener('wheel', markInteraction, { passive: true });
     navScroll.addEventListener('scroll', wrap);
     window.addEventListener('resize', measure);
     window.addEventListener('load', measure);
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(measure);
+    }
+    setTimeout(measure, 300); // reflow tardio (fontes/imagens) em conexões lentas
 
     measure();
     requestAnimationFrame(tick);
