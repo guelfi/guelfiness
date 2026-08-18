@@ -81,7 +81,7 @@ jobs:
             fi
 
             CONTAINER_NAME="guelfiness-website"
-            PROXY_NET="projetos-net"
+            PROXY_NET="www_projetos-net"
 
             echo "Build e restart do container..."
             $DOCKER_CMD up -d --build --force-recreate $CONTAINER_NAME
