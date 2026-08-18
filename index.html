@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0e14'/%3E%3Ctext x='32' y='42' font-family='monospace' font-size='26' font-weight='800' fill='%233fd3c6' text-anchor='middle'%3EMG%3C/text%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=5" />
+<link rel="stylesheet" href="assets/css/style.css?v=6" />
 <script>
   /* aplica o tema salvo antes do primeiro paint, evita flash */
   (function () {
@@ -35,37 +35,23 @@
   </div>
 
   <div class="nav-bar">
+    <button class="nav-arrow nav-arrow-left is-hidden" id="navArrowLeft" aria-label="Rolar menu para a esquerda">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
     <div class="nav-scroll" id="navScroll">
       <nav class="main-nav" id="mainNav">
-        <div class="nav-set">
-          <a href="#sobre">Sobre</a>
-          <a href="#skills">Skills</a>
-          <a href="#projetos">Projetos</a>
-          <a href="#open-source">Open Source</a>
-          <a href="#infra">Infraestrutura</a>
-          <a href="#experiencia">Experiência</a>
-          <a href="#contato">Contato</a>
-        </div>
-        <div class="nav-set" aria-hidden="true">
-          <a href="#sobre" tabindex="-1">Sobre</a>
-          <a href="#skills" tabindex="-1">Skills</a>
-          <a href="#projetos" tabindex="-1">Projetos</a>
-          <a href="#open-source" tabindex="-1">Open Source</a>
-          <a href="#infra" tabindex="-1">Infraestrutura</a>
-          <a href="#experiencia" tabindex="-1">Experiência</a>
-          <a href="#contato" tabindex="-1">Contato</a>
-        </div>
-        <div class="nav-set" aria-hidden="true">
-          <a href="#sobre" tabindex="-1">Sobre</a>
-          <a href="#skills" tabindex="-1">Skills</a>
-          <a href="#projetos" tabindex="-1">Projetos</a>
-          <a href="#open-source" tabindex="-1">Open Source</a>
-          <a href="#infra" tabindex="-1">Infraestrutura</a>
-          <a href="#experiencia" tabindex="-1">Experiência</a>
-          <a href="#contato" tabindex="-1">Contato</a>
-        </div>
+        <a href="#sobre">Sobre</a>
+        <a href="#skills">Skills</a>
+        <a href="#projetos">Projetos</a>
+        <a href="#open-source">Open Source</a>
+        <a href="#infra">Infraestrutura</a>
+        <a href="#experiencia">Experiência</a>
+        <a href="#contato">Contato</a>
       </nav>
     </div>
+    <button class="nav-arrow nav-arrow-right" id="navArrowRight" aria-label="Rolar menu para a direita">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
   </div>
 </header>
 
@@ -634,6 +620,6 @@
   </div>
 </footer>
 
-<script src="assets/js/main.js?v=6"></script>
+<script src="assets/js/main.js?v=7"></script>
 </body>
 </html>
