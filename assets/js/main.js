@@ -14,26 +14,69 @@
   window.addEventListener('resize', updateScrollOffset);
   window.addEventListener('load', updateScrollOffset);
 
-  // ---------------- Setas do menu (mobile) ----------------
-  var navScroll = document.getElementById('navScroll');
-  var navArrowLeft = document.getElementById('navArrowLeft');
-  var navArrowRight = document.getElementById('navArrowRight');
-  if (navScroll && navArrowLeft && navArrowRight) {
-    function updateNavArrows() {
-      var maxScroll = navScroll.scrollWidth - navScroll.clientWidth;
-      navArrowLeft.classList.toggle('is-hidden', navScroll.scrollLeft <= 4);
-      navArrowRight.classList.toggle('is-hidden', maxScroll <= 4 || navScroll.scrollLeft >= maxScroll - 4);
+  // ---------------- Carrossel infinito do menu (mobile) ----------------
+  // 3 cópias dos links em fila (.nav-set); rola sozinho, arrastar com o dedo
+  // assume o controle, e 3s depois de soltar (clicando ou não) volta a girar.
+  // No desktop (>=960px) só a 1ª cópia é exibida, centralizada — sem carrossel.
+  (function () {
+    var navScroll = document.getElementById('navScroll');
+    if (!navScroll) return;
+    var sets = navScroll.querySelectorAll('.nav-set');
+    if (sets.length < 3) return;
+
+    var CAROUSEL_BREAKPOINT = 960;
+    var SPEED = 0.55;
+    var RESUME_DELAY = 3000;
+    var setWidth = 0;
+    var paused = false;
+    var resumeTimer = null;
+
+    function isCarouselActive() {
+      return window.innerWidth < CAROUSEL_BREAKPOINT;
     }
-    navArrowLeft.addEventListener('click', function () {
-      navScroll.scrollBy({ left: -140, behavior: 'smooth' });
-    });
-    navArrowRight.addEventListener('click', function () {
-      navScroll.scrollBy({ left: 140, behavior: 'smooth' });
-    });
-    navScroll.addEventListener('scroll', updateNavArrows);
-    window.addEventListener('resize', updateNavArrows);
-    updateNavArrows();
-  }
+
+    function measure() {
+      setWidth = sets[0].offsetWidth;
+      if (setWidth > 0 && isCarouselActive()) {
+        navScroll.scrollLeft = setWidth;
+      }
+    }
+
+    function wrap() {
+      if (setWidth <= 0) return;
+      if (navScroll.scrollLeft >= setWidth * 2) navScroll.scrollLeft -= setWidth;
+      else if (navScroll.scrollLeft <= 0) navScroll.scrollLeft += setWidth;
+    }
+
+    function tick() {
+      if (isCarouselActive() && !paused) {
+        navScroll.scrollLeft += SPEED;
+        wrap();
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function pause() {
+      paused = true;
+      if (resumeTimer) { clearTimeout(resumeTimer); resumeTimer = null; }
+    }
+    function scheduleResume() {
+      if (resumeTimer) clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(function () { paused = false; }, RESUME_DELAY);
+    }
+
+    navScroll.addEventListener('pointerdown', pause);
+    navScroll.addEventListener('touchstart', pause, { passive: true });
+    navScroll.addEventListener('pointerup', scheduleResume);
+    navScroll.addEventListener('touchend', scheduleResume, { passive: true });
+    navScroll.addEventListener('touchcancel', scheduleResume, { passive: true });
+    navScroll.addEventListener('scroll', wrap);
+    window.addEventListener('resize', measure);
+    window.addEventListener('load', measure);
+
+    measure();
+    requestAnimationFrame(tick);
+  })();
 
   // ---------------- Theme toggle ----------------
   var themeToggle = document.getElementById('themeToggle');

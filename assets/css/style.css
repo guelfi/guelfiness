@@ -177,23 +177,24 @@ header.site-header {
   font-weight: 800;
   font-size: 0.85rem;
 }
-.nav-bar { display: flex; align-items: stretch; }
+.nav-bar { display: flex; }
 .nav-scroll {
   flex: 1 1 auto;
   min-width: 0;
   border-top: 1px solid var(--border);
   overflow-x: auto;
   scrollbar-width: none;
+  cursor: grab;
 }
+.nav-scroll:active { cursor: grabbing; }
 .nav-scroll::-webkit-scrollbar { display: none; }
-nav.main-nav {
+nav.main-nav { display: flex; }
+.nav-set {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  flex: 0 0 auto;
   gap: 4px;
   padding: 8px 24px;
-  margin: 0 auto;
-  max-width: 1160px;
   box-sizing: border-box;
 }
 nav.main-nav a {
@@ -559,32 +560,14 @@ footer.site-footer a:hover { color: var(--accent); }
 .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
 .reveal.in { opacity: 1; transform: translateY(0); }
 
-/* Menu do header: em telas largas cabe tudo, então centraliza dentro do
-   mesmo container de 1160px do resto da página. Abaixo disso mantém rolagem
-   horizontal por arraste (padrão usado no Allugme) e ganha setas nas pontas
-   — clicáveis, somem sozinhas quando não há mais pra rolar naquele sentido. */
+/* Menu do header: em telas largas cabe tudo, então mostra só a 1ª cópia
+   centralizada dentro do mesmo container de 1160px do resto da página.
+   Abaixo disso vira um carrossel infinito (3 cópias em fila, rolagem
+   automática); arrastar com o dedo assume o controle e ele volta a girar
+   sozinho 3s depois que o usuário solta, com ou sem seleção. */
 @media (min-width: 960px) {
-  nav.main-nav { justify-content: center; }
-}
-.nav-arrow {
-  display: none;
-  flex: 0 0 auto;
-  width: 52px;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  border-top: 1px solid var(--border);
-  background: var(--bg-raised);
-  padding: 0;
-  cursor: pointer;
-  color: var(--text-muted);
-  transition: color 0.15s ease, background 0.15s ease;
-}
-.nav-arrow svg { width: 24px; height: 24px; }
-.nav-arrow:hover { color: var(--accent); background: var(--bg-alt); }
-.nav-arrow.is-hidden { visibility: hidden; }
-@media (max-width: 959px) {
-  .nav-arrow { display: flex; }
+  nav.main-nav { justify-content: center; max-width: 1160px; margin: 0 auto; }
+  .nav-set:nth-child(n + 2) { display: none; }
 }
 
 /* ---------- Responsive ---------- */
