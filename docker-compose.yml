@@ -1,0 +1,5 @@
+services:
+  guelfiness-website:
+    build: .
+    container_name: guelfiness-website
+    restart: always

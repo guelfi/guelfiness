@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Marco Guelfi — Analista de Sistemas & Desenvolvedor Full Stack Sênior</title>
+<meta name="description" content="Marco Guelfi — Analista de Sistemas, Tech Lead e Desenvolvedor Full Stack com +35 anos de experiência. Portfólio de produtos SaaS próprios (Mobicard, Allugme, Batuara.net) e contribuições open source." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0e14'/%3E%3Ctext x='32' y='42' font-family='monospace' font-size='26' font-weight='800' fill='%233fd3c6' text-anchor='middle'%3EMG%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css" />
+<script>
+  /* aplica o tema salvo antes do primeiro paint, evita flash */
+  (function () {
+    var saved = localStorage.getItem('guelfiness-theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+  })();
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container nav-wrap">
+    <a href="#top" class="logo">
+      <span class="logo-mark mono">MG</span>
+      Guelfiness
+    </a>
+
+    <nav class="main-nav" id="mainNav">
+      <a href="#sobre">Sobre</a>
+      <a href="#skills">Skills</a>
+      <a href="#projetos">Projetos</a>
+      <a href="#open-source">Open Source</a>
+      <a href="#infra">Infraestrutura</a>
+      <a href="#experiencia">Experiência</a>
+      <a href="#contato">Contato</a>
+    </nav>
+
+    <div class="header-actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema claro/escuro">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="nav-toggle" id="navToggle" aria-label="Abrir menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ================= HERO ================= -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-copy reveal">
+        <p class="role-line">Analista de Sistemas <span class="mono">·</span> Tech Lead <span class="mono">·</span> Full Stack Developer</p>
+        <h1>Marco Guelfi</h1>
+        <p class="lead">+35 anos transformando necessidades de negócio em software, do MS-DOS em 1990 até a era da IA.</p>
+        <div class="hero-actions">
+          <a href="#projetos" class="btn btn-primary">Ver projetos</a>
+          <a href="assets/cv/Marco-Guelfi-CV2026.pdf" class="btn btn-outline" download>Baixar currículo</a>
+        </div>
+        <div class="hero-socials">
+          <a class="social-btn" href="https://www.linkedin.com/in/mguelfi/" target="_blank" rel="noopener" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>
+          </a>
+          <a class="social-btn" href="https://github.com/guelfi" target="_blank" rel="noopener" aria-label="GitHub">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.21-3.37-1.21-.46-1.19-1.11-1.51-1.11-1.51-.91-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.9 1.55 2.36 1.11 2.93.85.09-.66.35-1.11.64-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.31.1-2.73 0 0 .84-.27 2.75 1.05a9.3 9.3 0 0 1 5 0c1.91-1.32 2.75-1.05 2.75-1.05.55 1.42.2 2.47.1 2.73.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg>
+          </a>
+          <a class="social-btn" href="mailto:guelfi@msn.com" aria-label="E-mail">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4V4z"/><path d="M4 6l8 7 8-7"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-photo-wrap reveal">
+        <div class="hero-photo">
+          <img src="assets/img/marco-guelfi.jpg" alt="Foto de Marco Guelfi" />
+        </div>
+        <div class="hero-stat-card">
+          <div class="num mono">35+</div>
+          <div class="label">anos de experiência em TI</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SOBRE ================= -->
+  <section id="sobre">
+    <div class="container">
+      <div class="about-grid">
+        <div class="reveal">
+          <div class="eyebrow">Sobre mim</div>
+          <h2>Da linha de comando ao SaaS em produção</h2>
+          <p class="lead">Comecei em 1990 desenvolvendo em MS-DOS com Clipper, COBOL, C/C++ e Basic. Em 1996 migrei para Windows com Visual Basic e Delphi, e desde o lançamento do .NET em 2003 construí minha base em C#. Hoje concilio o papel de Analista de Sistemas com o de criador e mantenedor de produtos SaaS próprios.</p>
+          <p>Tenho como marca a liderança técnica natural — seja pelo relacionamento com equipes que acabo liderando, seja pela visão de negócio que me permite atuar como Product Owner, entendendo a necessidade real por trás da tecnologia. Autodidata, resiliente e movido por resolução de problemas.</p>
+
+          <ul class="timeline-mini">
+            <li>
+              <div class="t-year">1990 — MS-DOS</div>
+              <div class="t-desc">Clipper, COBOL, C/C++ e Basic — os primeiros sistemas, incluindo geração de tickets-refeição com segurança de papel-moeda na Blue Carts.</div>
+            </li>
+            <li>
+              <div class="t-year">1996 — Windows</div>
+              <div class="t-desc">Migração para Visual Basic e Delphi; liderança de área de TI na Green Line Sistema de Saúde.</div>
+            </li>
+            <li>
+              <div class="t-year">2003 — .NET & C#</div>
+              <div class="t-desc">Adoção do Microsoft .NET como base técnica; anos como Coordenador de Projetos, Programador Sênior e Tech Lead em empresas como B2W/Americanas, FNAC e Lis2b/HeadsOn.</div>
+            </li>
+            <li>
+              <div class="t-year">Hoje</div>
+              <div class="t-desc">Analista de Sistemas, mantendo em paralelo uma linha de produtos SaaS próprios (Allugme, Mobicard, Barbear.IA, Pet360, Bela360 e mais). Projeto Social site da Casa Batuara.</div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="now-card reveal">
+          <div class="eyebrow">Atualmente</div>
+          <h3>EBD — Empresa Brasileira de Distribuição</h3>
+          <div class="now-meta">Analista de Sistemas · Agosto/2025 — atual · São Paulo/SP</div>
+          <ul>
+            <li>Implantação de sistemas de terceiros e entendimento de necessidades de negócio</li>
+            <li>Controle de Ativos e Gestão de Patrimônio</li>
+            <li>Sistema de Abertura de Chamado Técnico para equipamentos Kibon</li>
+            <li>Gestão de Admissão Digital e integração com RM.Labore (TOTVS)</li>
+            <li>Integração VAPZA (volume de vendas e gestão de canal)</li>
+            <li>Rotinas em Python para consumo de APIs REST</li>
+            <li>APIs com gerenciador Sensedia</li>
+            <li>Consultas em Oracle e na plataforma Winthor (ERP corporativo)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SKILLS ================= -->
+  <section id="skills">
+    <div class="container">
+      <div class="section-head reveal">
+        <div class="eyebrow">Skills técnicos</div>
+        <h2>Ferramentas que uso no dia a dia</h2>
+        <p>Mais de três décadas acumulando stack — do C/C++ aos frameworks web modernos.</p>
+      </div>
+
+      <div class="skills-grid">
+        <div class="skill-card reveal">
+          <div class="skill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg></div>
+          <h3>Linguagens & Backend</h3>
+          <div class="tag-row">
+            <span class="tag">C#</span><span class="tag">.NET / .NET Core</span><span class="tag">ASP.NET</span>
+            <span class="tag">PHP / Laravel</span><span class="tag">C / C++</span><span class="tag">Visual Basic</span>
+            <span class="tag">Delphi</span><span class="tag">Python</span><span class="tag">Node.js</span>
+          </div>
+        </div>
+
+        <div class="skill-card reveal">
+          <div class="skill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg></div>
+          <h3>Frontend</h3>
+          <div class="tag-row">
+            <span class="tag">React</span><span class="tag">Next.js</span><span class="tag">Angular</span>
+            <span class="tag">Vue.js</span><span class="tag">TypeScript</span><span class="tag">JavaScript</span>
+            <span class="tag">HTML5 / CSS3</span><span class="tag">Material-UI</span><span class="tag">Tailwind</span>
+          </div>
+        </div>
+
+        <div class="skill-card reveal">
+          <div class="skill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3"/></svg></div>
+          <h3>Dados</h3>
+          <div class="tag-row">
+            <span class="tag">SQL Server</span><span class="tag">PostgreSQL</span><span class="tag">Oracle</span>
+            <span class="tag">MySQL</span><span class="tag">MongoDB</span><span class="tag">SQLite</span>
+            <span class="tag">Modelagem ER</span>
+          </div>
+        </div>
+
+        <div class="skill-card reveal">
+          <div class="skill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l9 4.5v11L12 22l-9-4.5v-11L12 2z"/><path d="M12 22V12M21 6.5L12 12 3 6.5"/></svg></div>
+          <h3>Cloud & DevOps</h3>
+          <div class="tag-row">
+            <span class="tag">Docker</span><span class="tag">Oracle Cloud (OCI)</span><span class="tag">Microsoft Azure</span>
+            <span class="tag">Nginx</span><span class="tag">GitHub Actions</span><span class="tag">Linux</span>
+            <span class="tag">CI/CD</span>
+          </div>
+        </div>
+
+        <div class="skill-card reveal">
+          <div class="skill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+          <h3>Arquitetura & Processos</h3>
+          <div class="tag-row">
+            <span class="tag">Clean Architecture</span><span class="tag">DDD</span><span class="tag">CQRS</span>
+            <span class="tag">MVC</span><span class="tag">API REST</span><span class="tag">SCRUM</span>
+            <span class="tag">Multi-tenant</span>
+          </div>
+        </div>
+
+        <div class="skill-card reveal">
+          <div class="skill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <h3>Liderança</h3>
+          <div class="tag-row">
+            <span class="tag">Tech Lead</span><span class="tag">Product Owner</span><span class="tag">Especificação técnica</span>
+            <span class="tag">Gestão de equipes</span><span class="tag">Negociação</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="softskills reveal">
+        <span class="tag">Autonomia</span><span class="tag">Comunicação</span><span class="tag">Resiliência</span>
+        <span class="tag">Autodidata</span><span class="tag">Pensamento crítico</span><span class="tag">Colaborativo</span>
+        <span class="tag">Adaptabilidade</span><span class="tag">Objetividade</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PROJETOS ================= -->
+  <section id="projetos">
+    <div class="container">
+      <div class="section-head reveal">
+        <div class="eyebrow">Portfólio</div>
+        <h2>Produtos que projetei e construí</h2>
+        <p>De MVPs em desenvolvimento a produtos comerciais em produção — todos com arquitetura própria, do banco de dados ao deploy.</p>
+      </div>
+
+      <div class="filter-bar reveal">
+        <button class="filter-btn active" data-filter="all">Todos</button>
+        <button class="filter-btn" data-filter="producao">Em produção</button>
+        <button class="filter-btn" data-filter="mvp-avancado">MVP avançado</button>
+        <button class="filter-btn" data-filter="mvp-inicial">MVP inicial</button>
+      </div>
+
+      <div class="project-grid" id="projectGrid">
+
+        <article class="project-card reveal" data-status="producao">
+          <div class="project-top">
+            <div><h3 class="project-title">Batuara.net</h3><div class="project-cat">Projeto social · Open Source</div></div>
+            <span class="status-badge status-producao">Em produção</span>
+          </div>
+          <p>Sistema digital para a Casa de Caridade Caboclo Batuara: site público, calendário de eventos, conteúdo educativo, doações e dashboard administrativo.</p>
+          <div class="tag-row"><span class="tag">.NET 8</span><span class="tag">React</span><span class="tag">PostgreSQL</span><span class="tag">Docker</span></div>
+          <div class="project-links">
+            <a class="btn btn-sm btn-primary" href="https://www.batuara.org.br/" target="_blank" rel="noopener">Ver ao vivo</a>
+            <a class="btn btn-sm btn-outline" href="https://github.com/guelfi/Batuara.net" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </article>
+
+        <article class="project-card reveal" data-status="mvp-avancado">
+          <div class="project-top">
+            <div><h3 class="project-title">Mobicard</h3><div class="project-cat">MVP privado/comercial · estágio avançado</div></div>
+            <span class="status-badge status-producao">Em produção</span>
+          </div>
+          <p>Plataforma de cartões de visita digital. Atuo como Product Owner desde 2022 — projeto no ar, captando clientes reais e em evolução contínua.</p>
+          <div class="tag-row"><span class="tag">PHP</span><span class="tag">Laravel</span><span class="tag">Oracle Cloud</span></div>
+          <div class="project-links">
+            <a class="btn btn-sm btn-primary" href="https://www.mobicard.com.br/@guelfi" target="_blank" rel="noopener">Ver ao vivo</a>
+          </div>
+        </article>
+
+        <article class="project-card reveal" data-status="producao">
+          <div class="project-top">
+            <div><h3 class="project-title">Allugme</h3><div class="project-cat">MVP privado/comercial · estágio avançado</div></div>
+            <span class="status-badge status-producao">Em produção</span>
+          </div>
+          <p>SaaS multi-tenant de vitrine imobiliária, com agenda de visitas e integração WhatsApp via Evolution API. Backend .NET 10 + frontend React.</p>
+          <div class="tag-row"><span class="tag">.NET 10</span><span class="tag">React</span><span class="tag">Multi-tenant</span><span class="tag">WhatsApp API</span></div>
+          <div class="project-links">
+            <a class="btn btn-sm btn-primary" href="https://allugme.online" target="_blank" rel="noopener">Ver ao vivo</a>
+            <a class="btn btn-sm btn-outline" href="https://github.com/guelfi/allugme" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </article>
+
+        <article class="project-card reveal" data-status="mvp-avancado">
+          <div class="project-top">
+            <div><h3 class="project-title">HealthCore</h3><div class="project-cat">MVP privado/comercial · estágio avançado</div></div>
+            <span class="status-badge status-mvp-avancado">MVP avançado</span>
+          </div>
+          <p>Sistema de gestão médica com suporte a modalidades DICOM (CT, MR, PT e mais), idempotência em operações críticas e conformidade LGPD.</p>
+          <div class="tag-row"><span class="tag">.NET 8</span><span class="tag">React 19</span><span class="tag">TypeScript</span><span class="tag">DICOM</span></div>
+          <div class="project-links">
+            <a class="btn btn-sm btn-outline" href="https://github.com/guelfi/HealthCore" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </article>
+
+        <article class="project-card reveal" data-status="producao">
+          <div class="project-top">
+            <div><h3 class="project-title">Unisystem</h3><div class="project-cat">Projeto técnico · solicitação de empresa</div></div>
+            <span class="status-badge status-producao">Em produção</span>
+          </div>
+          <p>Gestão de usuários com Clean Architecture + CQRS, desenvolvido como desafio técnico solicitado por empresa. Autenticação JWT, testes automatizados.</p>
+          <div class="tag-row"><span class="tag">.NET 8</span><span class="tag">Angular 19</span><span class="tag">CQRS</span><span class="tag">JWT</span></div>
+          <div class="project-links">
+            <a class="btn btn-sm btn-primary" href="http://129.153.86.168/unisystem/" target="_blank" rel="noopener">Ver ao vivo</a>
+            <a class="btn btn-sm btn-outline" href="https://github.com/guelfi/Unisystem" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </article>
+
+        <article class="project-card reveal" data-status="producao">
+          <div class="project-top">
+            <div><h3 class="project-title">HakoInteriores</h3><div class="project-cat">Projeto sob demanda · cliente</div></div>
+            <span class="status-badge status-producao">Em produção</span>
+          </div>
+          <p>Website institucional estático desenvolvido sob demanda para cliente do setor de interiores, com deploy simples via Nginx.</p>
+          <div class="tag-row"><span class="tag">HTML5</span><span class="tag">CSS3</span><span class="tag">JavaScript</span></div>
+          <div class="project-links">
+            <a class="btn btn-sm btn-primary" href="https://www.hakointeriores.com.br" target="_blank" rel="noopener">Ver ao vivo</a>
+            <a class="btn btn-sm btn-outline" href="https://github.com/guelfi/HakoInteriores" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </article>
+
+        <article class="project-card reveal" data-status="mvp-inicial">
+          <div class="project-top">
+            <div><h3 class="project-title">Barbear.IA</h3><div class="project-cat">MVP privado/comercial · desenvolvimento inicial</div></div>
+            <span class="status-badge status-mvp-inicial">Em desenvolvimento</span>
+          </div>
+          <p>SaaS multi-tenant para gestão de barbearias. Frontend e landing page comercial já em produção; API .NET 10 em construção.</p>
+          <div class="tag-row"><span class="tag">React</span><span class="tag">TypeScript</span><span class="tag">.NET 10</span><span class="tag">Redis</span></div>
+          <div class="project-links">
+            <a class="btn btn-sm btn-outline" href="https://github.com/guelfi/Barbear.IA" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </article>
+
+        <article class="project-card reveal" data-status="mvp-inicial">
+          <div class="project-top">
+            <div><h3 class="project-title">Bela360</h3><div class="project-cat">MVP privado/comercial · desenvolvimento inicial</div></div>
+            <span class="status-badge status-mvp-inicial">Em desenvolvimento</span>
+          </div>
+          <p>Gestão e automação para salões de beleza e barbearias via WhatsApp: agenda inteligente, CRM, fidelidade e automações com Evolution API.</p>
+          <div class="tag-row"><span class="tag">Node.js</span><span class="tag">TypeScript</span><span class="tag">PostgreSQL</span><span class="tag">WhatsApp API</span></div>
+          <div class="project-links">
+            <a class="btn btn-sm btn-outline" href="https://github.com/guelfi/bela360" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </article>
+
+        <article class="project-card reveal" data-status="mvp-inicial">
+          <div class="project-top">
+            <div><h3 class="project-title">Pet360</h3><div class="project-cat">MVP privado/comercial · desenvolvimento inicial</div></div>
+            <span class="status-badge status-mvp-inicial">Em desenvolvimento</span>
+          </div>
+          <p>Plataforma SaaS para negócios pet: clínicas, petshops, hotéis e creches. Prontuário eletrônico, carteira de vacinas e agendamento via WhatsApp.</p>
+          <div class="tag-row"><span class="tag">Next.js</span><span class="tag">NestJS</span><span class="tag">PostgreSQL</span><span class="tag">Multi-tenant</span></div>
+          <div class="project-links">
+            <a class="btn btn-sm btn-outline" href="https://github.com/guelfi/pet360" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </article>
+
+        <article class="project-card reveal" data-status="mvp-inicial">
+          <div class="project-top">
+            <div><h3 class="project-title">DriverHub</h3><div class="project-cat">MVP privado/comercial · desenvolvimento inicial</div></div>
+            <span class="status-badge status-mvp-inicial">Em desenvolvimento</span>
+          </div>
+          <p>Micro SaaS para motoristas de aplicativo (Uber, 99): controle de quilometragem, lucro e desempenho por plataforma. Também laboratório de Clean Architecture e DDD.</p>
+          <div class="tag-row"><span class="tag">.NET 8</span><span class="tag">Clean Architecture</span><span class="tag">React Native</span></div>
+          <div class="project-links">
+            <a class="btn btn-sm btn-outline" href="https://github.com/guelfi/DriverHub" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= OPEN SOURCE ================= -->
+  <section id="open-source">
+    <div class="container">
+      <div class="section-head reveal">
+        <div class="eyebrow">Comunidade</div>
+        <h2>Contribuição Open Source</h2>
+        <p>Além de manter meus próprios projetos, contribuo com ferramentas open source de terceiros quando encontro um problema real.</p>
+      </div>
+
+      <div class="oss-card reveal">
+        <div class="oss-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.21-3.37-1.21-.46-1.19-1.11-1.51-1.11-1.51-.91-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.9 1.55 2.36 1.11 2.93.85.09-.66.35-1.11.64-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.31.1-2.73 0 0 .84-.27 2.75 1.05a9.3 9.3 0 0 1 5 0c1.91-1.32 2.75-1.05 2.75-1.05.55 1.42.2 2.47.1 2.73.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg>
+        </div>
+        <div>
+          <h3>Carcará Code — fix de compatibilidade no Linux/GNOME</h3>
+          <div class="oss-meta">PR enviada e aceita pelo mantenedor original (<a href="https://github.com/Yg0rAndrade/carcara-code" target="_blank" rel="noopener" class="mono">Yg0rAndrade/carcara-code</a>) — IDE minimalista para Claude Code</div>
+          <p>Identifiquei e corrigi um bug real de agrupamento de ícones no GNOME Shell moderno: o WM_CLASS da janela era comparado em Latin-1 contra o StartupWMClass do <code class="mono">.desktop</code> lido em UTF-8, então nomes acentuados como "Carcará Code" nunca batiam — o app abria, mas com um ícone solto e genérico na dock, sem mesclar com o ícone fixado.</p>
+          <div class="commit-box">
+            <div class="commit-title">fix(linux): app_id ASCII evita ícone solto na dock do GNOME</div>
+            electron/platform.cjs — nova coluna <span class="mono">appId</span> na tabela de plataformas (ASCII sem espaço só no Linux) + <span class="mono">appIdFor()</span><br/>
+            main.js — <span class="mono">app.setName()</span> passa a usar o app_id específico da plataforma<br/>
+            package.json — <span class="mono">desktopName</span>, <span class="mono">linux.executableName</span> e <span class="mono">linux.syncDesktopName</span> para o electron-builder
+          </div>
+          <div class="oss-links">
+            <a class="btn btn-sm btn-primary" href="https://github.com/guelfi/carcara-code/commit/e9c69955d8a4d543745e5c397872c7c769e5b904" target="_blank" rel="noopener">Ver commit</a>
+            <a class="btn btn-sm btn-outline" href="https://github.com/guelfi/carcara-code" target="_blank" rel="noopener">Meu fork</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= INFRAESTRUTURA ================= -->
+  <section id="infra">
+    <div class="container">
+      <div class="section-head reveal">
+        <div class="eyebrow">DevOps</div>
+        <h2>Vários produtos, uma única infraestrutura</h2>
+        <p>Além de projetar e codar cada sistema, sou eu quem opera a infraestrutura: containers, reverse proxy, bancos e deploy de múltiplos SaaS em paralelo, em ambiente local e na Oracle Cloud (Always Free Tier).</p>
+      </div>
+
+      <div class="skills-grid">
+        <div class="skill-card reveal">
+          <div class="skill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3v4M8 3v4M2 11h20"/></svg></div>
+          <h3>Docker em todo lugar</h3>
+          <p style="margin-bottom:0">Cada produto roda em containers isolados (API, frontend, banco, cache) orquestrados via <span class="mono">docker compose</span> — perfis distintos para local, staging e produção.</p>
+        </div>
+        <div class="skill-card reveal">
+          <div class="skill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div>
+          <h3>Reverse proxy compartilhado</h3>
+          <p style="margin-bottom:0">Um Nginx central roteia múltiplos domínios/paths para os containers certos, permitindo vários SaaS ativos simultaneamente numa única VM Oracle Cloud Free Tier.</p>
+        </div>
+        <div class="skill-card reveal">
+          <div class="skill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></div>
+          <h3>CI/CD com GitHub Actions</h3>
+          <p style="margin-bottom:0">Pipelines de build, validação e deploy automático para OCI, com paridade entre o ambiente local (nginx-local) e o de produção.</p>
+        </div>
+        <div class="skill-card reveal">
+          <div class="skill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/></svg></div>
+          <h3>Observabilidade via Portainer</h3>
+          <p style="margin-bottom:0">Gestão e monitoramento de todos os containers (status, logs, portas, health checks) em um único painel, cobrindo todos os produtos ativos ao mesmo tempo.</p>
+        </div>
+      </div>
+
+      <div class="tag-row reveal" style="margin-top:28px">
+        <span class="tag">Allugme</span><span class="tag">Batuara.net</span><span class="tag">Barbear.IA</span>
+        <span class="tag">Bela360</span><span class="tag">Pet360</span><span class="tag">Unisystem</span>
+        <span class="tag">DriverHub</span><span class="tag">HakoInteriores</span><span class="tag">Guelfiness</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= EXPERIÊNCIA ================= -->
+  <section id="experiencia">
+    <div class="container">
+      <div class="section-head reveal">
+        <div class="eyebrow">Trajetória</div>
+        <h2>Experiência profissional</h2>
+        <p>Mais de 35 anos de carreira — de programador júnior em MS-DOS a Tech Lead e Product Owner.</p>
+      </div>
+
+      <ul class="exp-list reveal">
+        <li class="exp-item">
+          <div class="exp-period">Ago/2025 — atual</div>
+          <div>
+            <div class="exp-role">Analista de Sistemas</div>
+            <div class="exp-company">EBD — Empresa Brasileira de Distribuição</div>
+            <p class="exp-desc">Implantação de sistemas de terceiros, integrações (RM.Labore/TOTVS, VAPZA, Sensedia), automações em Python e consultas Oracle/Winthor.</p>
+          </div>
+        </li>
+        <li class="exp-item">
+          <div class="exp-period">2024</div>
+          <div>
+            <div class="exp-role">Tech Lead</div>
+            <div class="exp-company">Kulltech — atuação pontual, sem vínculo formal</div>
+            <p class="exp-desc">Análise de negócios e Tech Lead .NET Core/C# com SQL Server em projetos de back-end e API REST.</p>
+          </div>
+        </li>
+        <li class="exp-item">
+          <div class="exp-period">Nov/2022 — Abr/2024</div>
+          <div>
+            <div class="exp-role">Tech Lead</div>
+            <div class="exp-company">Lis2b / HeadsOn — 100% remoto</div>
+            <p class="exp-desc">Acompanhamento de projetos e equipes, Azure DevOps, Docker/Linux. Tech Lead em projeto C/C++ com ISO8583 para instituição financeira e no sistema SLC (MongoDB + C#) para banco digital.</p>
+          </div>
+        </li>
+        <li class="exp-item">
+          <div class="exp-period">Mar/2022 — atual</div>
+          <div>
+            <div class="exp-role">Product Owner</div>
+            <div class="exp-company">Mobicard</div>
+            <p class="exp-desc">Plataforma de cartões de visita digital (mobicard.com.br), no ar e captando clientes. Especificação funcional, testes e apresentação comercial.</p>
+          </div>
+        </li>
+        <li class="exp-item">
+          <div class="exp-period">Jan/2014 — Dez/2021</div>
+          <div>
+            <div class="exp-role">Sócio-proprietário</div>
+            <div class="exp-company">Quatervois Comércio de Roupas</div>
+            <p class="exp-desc">Gestão administrativa e financeira de marca própria com cinco unidades em São Paulo; loja virtual em nopCommerce (.NET).</p>
+          </div>
+        </li>
+      </ul>
+
+      <div id="exp-more">
+        <ul class="exp-list">
+          <li class="exp-item">
+            <div class="exp-period">Jan/2012 — Nov/2013</div>
+            <div>
+              <div class="exp-role">Desenvolvedor .NET/C#</div>
+              <div class="exp-company">ITLab / FNAC Brasil</div>
+              <p class="exp-desc">Manutenção do e-commerce e sistemas antifraude para redução de chargeback.</p>
+            </div>
+          </li>
+          <li class="exp-item">
+            <div class="exp-period">Jun/2010 — Dez/2011</div>
+            <div>
+              <div class="exp-role">Programador Sênior C#</div>
+              <div class="exp-company">SubMarino Viagens</div>
+              <p class="exp-desc">Líder técnico e desenvolvedor full stack do site de pacotes de viagens; promovido a coordenador de projetos.</p>
+            </div>
+          </li>
+          <li class="exp-item">
+            <div class="exp-period">Fev/2007 — Nov/2009</div>
+            <div>
+              <div class="exp-role">Coordenador de Projetos</div>
+              <div class="exp-company">Accurate [Americanas.com | Submarino.com | B2W]</div>
+              <p class="exp-desc">Manutenção do e-commerce do Submarino; após a fusão B2W, expansão de atuação para a bandeira Shoptime.</p>
+            </div>
+          </li>
+          <li class="exp-item">
+            <div class="exp-period">Abr/2006 — Ago/2007</div>
+            <div>
+              <div class="exp-role">Analista de Sistemas / Programador C#</div>
+              <div class="exp-company">IDS Scheer</div>
+              <p class="exp-desc">Implantação do Microsoft CRM em clientes como Ingram Micro, com desenvolvimento de módulos customizados.</p>
+            </div>
+          </li>
+          <li class="exp-item">
+            <div class="exp-period">Mar/2005 — Nov/2005</div>
+            <div>
+              <div class="exp-role">Programador C#</div>
+              <div class="exp-company">Spring Wireless</div>
+              <p class="exp-desc">Desenvolvimento mobile com as primeiras versões do .NET para dispositivos Windows CE.</p>
+            </div>
+          </li>
+          <li class="exp-item">
+            <div class="exp-period">Jan/1998 — Dez/2004</div>
+            <div>
+              <div class="exp-role">Coordenador de Projetos</div>
+              <div class="exp-company">Ibelli & Fainzilber</div>
+              <p class="exp-desc">De programador a coordenador da equipe de desenvolvimento; sistemas em WindowsCE, POS e dispositivos embarcados em C/C++.</p>
+            </div>
+          </li>
+          <li class="exp-item">
+            <div class="exp-period">Set/1995 — Jun/1997</div>
+            <div>
+              <div class="exp-role">Coordenador de Projetos</div>
+              <div class="exp-company">Green Line Sistema de Saúde</div>
+              <p class="exp-desc">Gestão de toda a área de TI: migração de sistemas para Oracle, budget e infraestrutura de equipamentos.</p>
+            </div>
+          </li>
+          <li class="exp-item">
+            <div class="exp-period">1990 — 1995</div>
+            <div>
+              <div class="exp-role">Diversas empresas nacionais</div>
+              <div class="exp-company">Indústria, comércio e saúde</div>
+              <p class="exp-desc">Início de carreira em MS-DOS com Clipper, COBOL, Basic e Delphi. Destaque para a Blue Carts, onde por 3 anos desenvolvi sistemas de geração de tickets-refeição com segurança de papel-moeda e integração CMC7 em C/C++.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="exp-toggle-wrap reveal">
+        <button class="btn btn-outline btn-sm" id="expToggle">Ver trajetória completa (1995 — 2013)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CONTATO ================= -->
+  <section id="contato">
+    <div class="container contact-wrap">
+      <div class="reveal">
+        <div class="eyebrow">Vamos conversar</div>
+        <h2>Contato</h2>
+        <p>Aberto a novos projetos, parcerias técnicas e oportunidades como Tech Lead, Analista de Sistemas ou Desenvolvedor Sênior.</p>
+
+        <ul class="contact-list">
+          <li>
+            <a href="mailto:guelfi@msn.com">
+              <span class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4V4z"/><path d="M4 6l8 7 8-7"/></svg></span>
+              <span>guelfi@msn.com<span class="c-sub">E-mail</span></span>
+            </a>
+          </li>
+          <li>
+            <a href="tel:+5511975747470">
+              <span class="c-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.99.36 1.96.68 2.9a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.18-1.18a2 2 0 0 1 2.11-.45c.94.32 1.91.55 2.9.68A2 2 0 0 1 22 16.92z"/></svg></span>
+              <span>(11) 97574-7470<span class="c-sub">Telefone / WhatsApp</span></span>
+            </a>
+          </li>
+          <li>
+            <a href="https://www.linkedin.com/in/mguelfi/" target="_blank" rel="noopener">
+              <span class="c-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45z"/></svg></span>
+              <span>linkedin.com/in/mguelfi<span class="c-sub">LinkedIn</span></span>
+            </a>
+          </li>
+          <li>
+            <a href="https://github.com/guelfi" target="_blank" rel="noopener">
+              <span class="c-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.21-3.37-1.21-.46-1.19-1.11-1.51-1.11-1.51-.91-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.9 1.55 2.36 1.11 2.93.85.09-.66.35-1.11.64-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.31.1-2.73 0 0 .84-.27 2.75 1.05a9.3 9.3 0 0 1 5 0c1.91-1.32 2.75-1.05 2.75-1.05.55 1.42.2 2.47.1 2.73.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg></span>
+              <span>github.com/guelfi<span class="c-sub">Repositórios públicos</span></span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="contact-card reveal">
+        <div class="avail-badge">Disponível para novas oportunidades</div>
+        <h3>Vamos construir algo juntos</h3>
+        <p>Disponibilidade imediata (negociável). Aberto a modelos PJ ou CLT, remoto ou híbrido em São Paulo/SP.</p>
+        <a href="mailto:guelfi@msn.com" class="btn btn-primary" style="width:100%; justify-content:center; margin-top:8px;">Enviar e-mail</a>
+        <a href="assets/cv/Marco-Guelfi-CV2026.pdf" class="btn btn-outline" style="width:100%; justify-content:center; margin-top:10px;" download>Baixar currículo em PDF</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p style="margin:0">© <span id="year"></span> Marco Guelfi — Feito com HTML, CSS e JS puro. Código em <a href="https://github.com/guelfi/guelfiness" target="_blank" rel="noopener">github.com/guelfi/guelfiness</a></p>
+  </div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>

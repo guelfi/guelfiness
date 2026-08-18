@@ -1,0 +1,19 @@
+services:
+  guelfiness-website:
+    image: nginx:stable-alpine
+    container_name: guelfiness-website
+    volumes:
+      - ./index.html:/usr/share/nginx/html/index.html:ro
+      - ./assets:/usr/share/nginx/html/assets:ro
+    networks:
+      - projetos-local
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  projetos-local:
+    external: true

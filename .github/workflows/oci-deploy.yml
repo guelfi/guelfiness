@@ -1,0 +1,151 @@
+name: oci-deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy-compute-ssh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check required SSH credentials
+        id: check_ssh
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST || vars.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER || vars.SSH_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY || vars.SSH_PRIVATE_KEY }}
+        run: |
+          missing=()
+          for v in SSH_HOST SSH_USER SSH_PRIVATE_KEY; do
+            if [ -z "${!v}" ]; then
+              missing+=("$v")
+            fi
+          done
+          if [ ${#missing[@]} -eq 0 ]; then
+            echo "has_ssh=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_ssh=false" >> $GITHUB_OUTPUT
+            echo "::error::Missing SSH secrets: ${missing[*]}"
+            exit 1
+          fi
+
+      - name: Setup SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY || vars.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+        if: steps.check_ssh.outputs.has_ssh == 'true'
+
+      - name: Add remote host to known_hosts
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST || vars.SSH_HOST }}
+        run: |
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+        if: steps.check_ssh.outputs.has_ssh == 'true'
+
+      - name: Upload site to OCI
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST || vars.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER || vars.SSH_USER }}
+          REMOTE_DIR: ${{ secrets.REMOTE_DIR || '/var/www/guelfiness' }}
+        run: |
+          RDIR=${REMOTE_DIR}
+          ssh "$SSH_USER@$SSH_HOST" "sudo mkdir -p $RDIR && sudo chown $SSH_USER:$SSH_USER $RDIR"
+          rsync -avz --delete \
+            --exclude ".git" \
+            --exclude ".github" \
+            ./ "$SSH_USER@$SSH_HOST:$RDIR/"
+        if: steps.check_ssh.outputs.has_ssh == 'true'
+
+      - name: Rebuild and Restart Guelfiness Container
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST || vars.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER || vars.SSH_USER }}
+          REMOTE_DIR: ${{ secrets.REMOTE_DIR || '/var/www/guelfiness' }}
+        run: |
+          ssh "$SSH_USER@$SSH_HOST" "REMOTE_DIR='$REMOTE_DIR' bash -s" << 'EOF'
+            set -e
+            cd "$REMOTE_DIR"
+
+            if sudo docker compose version > /dev/null 2>&1; then
+              DOCKER_CMD="sudo docker compose"
+            else
+              DOCKER_CMD="sudo docker-compose"
+            fi
+
+            CONTAINER_NAME="guelfiness-website"
+            PROXY_NET="projetos-net"
+
+            echo "Build e restart do container..."
+            $DOCKER_CMD up -d --build --force-recreate $CONTAINER_NAME
+
+            echo "Aguardando container iniciar..."
+            sleep 3
+
+            if ! sudo docker ps --filter "name=$CONTAINER_NAME" --filter "status=running" -q | grep -q .; then
+              echo "ERRO: Container $CONTAINER_NAME não está rodando!"
+              sudo docker logs $CONTAINER_NAME --tail 30
+              exit 1
+            fi
+
+            CURRENT_NETS=$(sudo docker inspect $CONTAINER_NAME -f '{{range $net,$v := .NetworkSettings.Networks}}{{$net}} {{end}}' 2>/dev/null)
+            if echo "$CURRENT_NETS" | grep -q "$PROXY_NET"; then
+              echo "Container já conectado à rede $PROXY_NET"
+            else
+              echo "Conectando à rede $PROXY_NET..."
+              sudo docker network connect "$PROXY_NET" "$CONTAINER_NAME"
+            fi
+
+            echo "Deploy concluído. Status:"
+            sudo docker ps --filter "name=$CONTAINER_NAME" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+          EOF
+        if: steps.check_ssh.outputs.has_ssh == 'true'
+
+      - name: Health Check
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST || vars.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER || vars.SSH_USER }}
+        run: |
+          echo "Aguardando serviço estabilizar..."
+          sleep 5
+          ssh "$SSH_USER@$SSH_HOST" 'bash -s' << 'EOF'
+            set -e
+            CONTAINER_NAME="guelfiness-website"
+            for i in 1 2 3; do
+              code=$(sudo docker exec $CONTAINER_NAME wget -qO- -T 5 -S http://localhost/ 2>&1 | grep -m1 "HTTP/" | awk '{print $2}' || echo "000")
+              echo "Teste local (tentativa $i): HTTP $code"
+              if [ "$code" = "200" ]; then
+                echo "Health check local OK"
+                exit 0
+              fi
+              sleep 3
+            done
+            echo "AVISO: Health check local falhou"
+            sudo docker logs $CONTAINER_NAME --tail 20
+            exit 1
+          EOF
+        if: steps.check_ssh.outputs.has_ssh == 'true'
+
+      - name: External Verification
+        run: |
+          echo "Verificando acesso externo..."
+          sleep 5
+          for i in 1 2 3; do
+            code=$(curl --max-time 10 -s -o /dev/null -w "%{http_code}" https://www.guelfi.com.br/ || echo "000")
+            echo "Teste externo (tentativa $i): HTTP $code"
+            if [ "$code" = "200" ]; then
+              echo "Site acessível externamente!"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::warning::Site não retornou HTTP 200 externamente ainda (normal até DNS/SSL serem configurados)."
+        continue-on-error: true
+        if: steps.check_ssh.outputs.has_ssh == 'true'
