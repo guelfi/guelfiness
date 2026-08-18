@@ -4,6 +4,16 @@
   var THEME_KEY = 'guelfiness-theme';
   var root = document.documentElement;
 
+  // ---------------- Scroll offset (header fixo, 2 linhas) ----------------
+  var siteHeader = document.querySelector('.site-header');
+  function updateScrollOffset() {
+    if (!siteHeader) return;
+    root.style.scrollPaddingTop = (siteHeader.offsetHeight + 12) + 'px';
+  }
+  updateScrollOffset();
+  window.addEventListener('resize', updateScrollOffset);
+  window.addEventListener('load', updateScrollOffset);
+
   // ---------------- Theme toggle ----------------
   var themeToggle = document.getElementById('themeToggle');
   function currentTheme() {
