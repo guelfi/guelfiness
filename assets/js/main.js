@@ -19,17 +19,6 @@
     });
   }
 
-  // ---------------- Mobile nav ----------------
-  var navToggle = document.getElementById('navToggle');
-  var mainNav = document.getElementById('mainNav');
-  if (navToggle && mainNav) {
-    navToggle.addEventListener('click', function () {
-      mainNav.classList.toggle('open');
-    });
-    mainNav.querySelectorAll('a').forEach(function (a) {
-      a.addEventListener('click', function () { mainNav.classList.remove('open'); });
-    });
-  }
 
   // ---------------- Project filter ----------------
   var filterButtons = document.querySelectorAll('.filter-btn');
