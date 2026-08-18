@@ -14,6 +14,27 @@
   window.addEventListener('resize', updateScrollOffset);
   window.addEventListener('load', updateScrollOffset);
 
+  // ---------------- Setas do menu (mobile) ----------------
+  var navScroll = document.getElementById('navScroll');
+  var navArrowLeft = document.getElementById('navArrowLeft');
+  var navArrowRight = document.getElementById('navArrowRight');
+  if (navScroll && navArrowLeft && navArrowRight) {
+    function updateNavArrows() {
+      var maxScroll = navScroll.scrollWidth - navScroll.clientWidth;
+      navArrowLeft.classList.toggle('is-hidden', navScroll.scrollLeft <= 4);
+      navArrowRight.classList.toggle('is-hidden', maxScroll <= 4 || navScroll.scrollLeft >= maxScroll - 4);
+    }
+    navArrowLeft.addEventListener('click', function () {
+      navScroll.scrollBy({ left: -140, behavior: 'smooth' });
+    });
+    navArrowRight.addEventListener('click', function () {
+      navScroll.scrollBy({ left: 140, behavior: 'smooth' });
+    });
+    navScroll.addEventListener('scroll', updateNavArrows);
+    window.addEventListener('resize', updateNavArrows);
+    updateNavArrows();
+  }
+
   // ---------------- Theme toggle ----------------
   var themeToggle = document.getElementById('themeToggle');
   function currentTheme() {

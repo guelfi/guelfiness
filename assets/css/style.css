@@ -186,9 +186,8 @@ header.site-header {
 nav.main-nav {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 4px;
-  width: max-content;
-  min-width: 100%;
   padding: 8px 24px;
   margin: 0 auto;
   max-width: 1160px;
@@ -229,7 +228,7 @@ nav.main-nav a:hover { color: var(--text); background: var(--bg-raised); }
 
 /* ---------- Hero ---------- */
 .hero {
-  padding: 96px 0 80px;
+  padding: 7px 0 80px;
   border-bottom: 1px solid var(--border);
   position: relative;
   overflow: hidden;
@@ -552,6 +551,38 @@ footer.site-footer a:hover { color: var(--accent); }
 .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
 .reveal.in { opacity: 1; transform: translateY(0); }
 
+/* Menu do header: em telas largas cabe tudo, então centraliza dentro do
+   mesmo container de 1160px do resto da página. Abaixo disso mantém rolagem
+   horizontal por arraste (padrão usado no Allugme) e ganha setas nas pontas
+   — clicáveis, somem sozinhas quando não há mais pra rolar naquele sentido. */
+@media (min-width: 960px) {
+  nav.main-nav { justify-content: center; }
+}
+.nav-bar { position: relative; }
+.nav-arrow {
+  display: none;
+  position: absolute;
+  top: 1px;
+  bottom: 0;
+  width: 40px;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 2;
+  color: var(--text-muted);
+  transition: opacity 0.2s ease, color 0.15s ease;
+}
+.nav-arrow svg { width: 17px; height: 17px; }
+.nav-arrow:hover { color: var(--accent); }
+.nav-arrow.is-hidden { opacity: 0; pointer-events: none; }
+.nav-arrow-left { left: 0; justify-content: flex-start; padding-left: 20px; background: linear-gradient(to right, var(--bg) 45%, transparent); }
+.nav-arrow-right { right: 0; justify-content: flex-end; padding-right: 20px; background: linear-gradient(to left, var(--bg) 45%, transparent); }
+@media (max-width: 959px) {
+  .nav-arrow { display: flex; }
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 860px) {
   .hero-grid { grid-template-columns: 1fr; }
@@ -564,5 +595,5 @@ footer.site-footer a:hover { color: var(--accent); }
 
 @media (max-width: 540px) {
   section { padding: 64px 0; }
-  .hero { padding-top: 56px; }
+  .hero { padding-top: 7px; }
 }
