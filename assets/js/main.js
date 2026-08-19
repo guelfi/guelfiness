@@ -157,7 +157,11 @@
     function updateCurrentSection() {
       ticking = false;
       var headerH = siteHeader ? siteHeader.offsetHeight : 0;
-      var refLine = headerH + 16;
+      // Linha de referência exatamente na mesma posição em que um clique
+      // no menu alinha a seção (scroll-padding-top = headerH + 12) — assim
+      // a seção só vira "atual" ao rolar naturalmente quando já estaria
+      // encostada no header, o mesmo ponto em que clicar no link levaria.
+      var refLine = headerH + 12;
       var currentId = sections[0].id;
       for (var i = 0; i < sections.length; i++) {
         if (sections[i].getBoundingClientRect().top - refLine <= 0) {
