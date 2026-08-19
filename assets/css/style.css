@@ -66,7 +66,16 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; height: 100%; }
+/* Barra de rolagem nativa oculta: o indicador próprio (.scroll-indicator)
+   já cumpre esse papel, então manter as duas ficava duplicado. A rolagem
+   continua funcionando normalmente, só a barra visual some. */
+html {
+  scroll-behavior: smooth;
+  height: 100%;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html::-webkit-scrollbar { display: none; }
 
 /* Rodapé sempre visível no fim da tela quando o conteúdo é mais baixo que
    a viewport (ex: seção Contato), sem precisar calcular altura via JS —
@@ -260,11 +269,8 @@ nav.main-nav a {
   transition: color 0.15s ease, background 0.15s ease;
 }
 nav.main-nav a:hover { color: var(--text); background: var(--bg-raised); }
-nav.main-nav a.current { color: var(--accent); font-weight: 700; }
-@media (max-width: 959px) {
-  nav.main-nav a { border: 1.5px solid transparent; }
-  nav.main-nav a.current { border-color: var(--accent); }
-}
+nav.main-nav a { border: 1.5px solid transparent; }
+nav.main-nav a.current { color: var(--accent); font-weight: 700; border-color: var(--accent); }
 
 .header-actions { display: flex; align-items: center; gap: 10px; }
 
