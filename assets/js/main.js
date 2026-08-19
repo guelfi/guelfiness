@@ -13,15 +13,17 @@
     root.style.scrollPaddingTop = (siteHeader.offsetHeight + 12) + 'px';
   }
   // A seção Contato (última da página) recebe altura mínima igual ao
-  // espaço restante da viewport abaixo do header. Isso garante ao mesmo
-  // tempo que (a) sempre há espaço suficiente pra ela rolar coladinha no
-  // header, igual as outras seções, e (b) o rodapé sempre aparece
-  // exatamente no fim da tela, sem sobrar vão em branco nem precisar
-  // de padding artificial. Se o conteúdo da seção já for mais alto que
-  // isso, o min-height não tem efeito nenhum.
+  // espaço que sobra na viewport abaixo do header E acima do rodapé —
+  // ou seja, header + footer também entram na conta, não só o header.
+  // (Bug anterior: a fórmula só descontava o header, então o rodapé
+  // sempre "vazava" pra fora da tela por causa da própria altura dele.)
+  // Isso garante ao mesmo tempo que (a) dá pra rolar a seção coladinha
+  // no header, igual as outras, e (b) o rodapé aparece cheio, sem
+  // sobrar vão nem precisar de mais rolagem.
   function updateContatoMinHeight() {
-    if (!contatoSection || !siteHeader) return;
-    contatoSection.style.minHeight = (window.innerHeight - siteHeader.offsetHeight) + 'px';
+    if (!contatoSection || !siteHeader || !siteFooter) return;
+    var available = window.innerHeight - siteHeader.offsetHeight - siteFooter.offsetHeight - 12;
+    contatoSection.style.minHeight = Math.max(0, available) + 'px';
   }
   function updateLayout() {
     updateScrollOffset();
@@ -30,13 +32,15 @@
   updateLayout();
   window.addEventListener('resize', updateLayout);
   window.addEventListener('load', updateLayout);
-  // A troca de fonte (Google Fonts com display=swap) pode alterar a altura
-  // do header DEPOIS do evento 'load' (ex: quebra de linha diferente no
-  // menu). Sem isso, o cálculo do min-height do Contato ficava baseado numa
-  // altura de header desatualizada, deixando um vão enorme antes do rodapé.
-  // ResizeObserver reage a qualquer mudança real de altura do header.
-  if (siteHeader && 'ResizeObserver' in window) {
-    new ResizeObserver(updateLayout).observe(siteHeader);
+  // ResizeObserver no header E no rodapé: recalcula sempre que a altura
+  // real de qualquer um dos dois mudar, por qualquer motivo (troca de
+  // fonte com display=swap, quebra de linha diferente, etc) — mais
+  // confiável do que só confiar em load/resize, que podem disparar
+  // antes da altura final se estabilizar.
+  if ('ResizeObserver' in window) {
+    var layoutObserver = new ResizeObserver(updateLayout);
+    if (siteHeader) layoutObserver.observe(siteHeader);
+    if (siteFooter) layoutObserver.observe(siteFooter);
   }
 
   // ---------------- Carrossel infinito de projetos ----------------
@@ -46,12 +50,17 @@
   var projectTrack = document.getElementById('projectGrid');
   if (projectTrack) {
     projectTrack.insertAdjacentHTML('beforeend', projectTrack.innerHTML);
+    var resumeCarousel = function () {
+      setTimeout(function () { projectTrack.classList.remove('is-paused'); }, 500);
+    };
     projectTrack.addEventListener('touchstart', function () {
       projectTrack.classList.add('is-paused');
     }, { passive: true });
-    projectTrack.addEventListener('touchend', function () {
-      setTimeout(function () { projectTrack.classList.remove('is-paused'); }, 500);
-    }, { passive: true });
+    projectTrack.addEventListener('touchend', resumeCarousel, { passive: true });
+    // touchcancel: o sistema pode interromper o toque (ex: notificação,
+    // gesto de navegação) sem nunca disparar touchend — sem isso o
+    // carrossel ficava pausado pra sempre a partir desse toque.
+    projectTrack.addEventListener('touchcancel', resumeCarousel, { passive: true });
   }
 
   // ---------------- Setas do menu (mobile) ----------------
@@ -106,10 +115,20 @@
   // Marca com destaque (cor de fonte, e borda no mobile) o link do menu
   // correspondente à seção visível no topo da área útil (logo abaixo do
   // header fixo), conforme o usuário rola a página.
+  //
+  // Antes usava IntersectionObserver guardando a posição da seção no
+  // momento em que ela cruzou o threshold — só que o observer não
+  // reavalia continuamente enquanto a seção segue "intersectando" (ex:
+  // seções altas, que ficam intersectando por uma rolagem inteira), então
+  // essa posição guardada ficava desatualizada no meio da rolagem e podia
+  // fazer o menu marcar a seção errada (bug relatado tanto no desktop
+  // quanto no mobile). Agora calcula direto, a cada frame de rolagem, a
+  // última seção cujo topo já passou da linha de referência — sempre com
+  // a posição real e atual, sem nenhum valor em cache que possa envelhecer.
   (function () {
-    var sections = document.querySelectorAll('main section[id]');
+    var sections = Array.prototype.slice.call(document.querySelectorAll('main section[id]'));
     var navLinks = document.querySelectorAll('.main-nav a');
-    if (!sections.length || !navLinks.length || !('IntersectionObserver' in window)) return;
+    if (!sections.length || !navLinks.length) return;
 
     function setCurrent(id) {
       navLinks.forEach(function (a) {
@@ -117,38 +136,35 @@
       });
     }
 
-    // Guarda o estado de TODAS as seções intersectando no momento (não só
-    // as que mudaram neste lote) e sempre escolhe a mais próxima do topo —
-    // evita a seção errada "ganhar" só por ter sido a última processada.
-    var intersecting = {};
-    function pickCurrent() {
-      var bestId = null, bestDist = Infinity;
-      Object.keys(intersecting).forEach(function (id) {
-        var d = Math.abs(intersecting[id]);
-        if (d < bestDist) { bestDist = d; bestId = id; }
-      });
-      if (bestId) setCurrent(bestId);
-    }
-
-    var spyObserver = null;
-    function initSpy() {
-      if (spyObserver) spyObserver.disconnect();
-      intersecting = {};
+    var ticking = false;
+    function updateCurrentSection() {
+      ticking = false;
       var headerH = siteHeader ? siteHeader.offsetHeight : 0;
-      spyObserver = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            intersecting[entry.target.id] = entry.boundingClientRect.top;
-          } else {
-            delete intersecting[entry.target.id];
-          }
-        });
-        pickCurrent();
-      }, { rootMargin: '-' + (headerH + 4) + 'px 0px -70% 0px', threshold: 0 });
-      sections.forEach(function (s) { spyObserver.observe(s); });
+      var refLine = headerH + 16;
+      var currentId = sections[0].id;
+      for (var i = 0; i < sections.length; i++) {
+        if (sections[i].getBoundingClientRect().top - refLine <= 0) {
+          currentId = sections[i].id;
+        } else {
+          break;
+        }
+      }
+      // Perto do fim da página força a última seção — ela pode ser mais
+      // curta que a folga da linha de referência e nunca chegar a cruzá-la.
+      var atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+      if (atBottom) currentId = sections[sections.length - 1].id;
+      setCurrent(currentId);
     }
-    initSpy();
-    window.addEventListener('resize', initSpy);
+    function onScroll() {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(updateCurrentSection);
+      }
+    }
+    updateCurrentSection();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    window.addEventListener('load', updateCurrentSection);
   })();
 
   // ---------------- Theme toggle ----------------
