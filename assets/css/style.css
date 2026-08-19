@@ -147,15 +147,15 @@ main { flex: 1 0 auto; }
    ao lado da bolinha/thumb, acompanhando ela conforme rola a página. */
 .scroll-percent {
   position: absolute;
-  right: 11px;
+  right: 12px;
   writing-mode: vertical-rl;
-  transform: translateY(-50%);
+  transform: translateY(-50%) rotate(180deg);
   font-family: "JetBrains Mono", monospace;
-  font-size: 0.62rem;
+  font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--accent);
-  opacity: 0.7;
+  opacity: 0.75;
   white-space: nowrap;
   pointer-events: none;
 }
