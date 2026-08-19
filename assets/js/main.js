@@ -41,6 +41,20 @@
     updateNavArrows();
   }
 
+  // ---------------- Centraliza a opção clicada no menu (mobile) ----------------
+  if (navScroll) {
+    var NAV_MOBILE_BREAKPOINT = 960;
+    navScroll.querySelectorAll('a').forEach(function (link) {
+      link.addEventListener('click', function () {
+        if (window.innerWidth >= NAV_MOBILE_BREAKPOINT) return; // só no mobile
+        var navRect = navScroll.getBoundingClientRect();
+        var linkRect = link.getBoundingClientRect();
+        var delta = (linkRect.left + linkRect.width / 2) - (navRect.left + navRect.width / 2);
+        navScroll.scrollTo({ left: navScroll.scrollLeft + delta, behavior: 'smooth' });
+      });
+    });
+  }
+
   // ---------------- Theme toggle ----------------
   var themeToggle = document.getElementById('themeToggle');
   function currentTheme() {
