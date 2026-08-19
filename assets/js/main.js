@@ -30,6 +30,14 @@
   updateLayout();
   window.addEventListener('resize', updateLayout);
   window.addEventListener('load', updateLayout);
+  // A troca de fonte (Google Fonts com display=swap) pode alterar a altura
+  // do header DEPOIS do evento 'load' (ex: quebra de linha diferente no
+  // menu). Sem isso, o cálculo do min-height do Contato ficava baseado numa
+  // altura de header desatualizada, deixando um vão enorme antes do rodapé.
+  // ResizeObserver reage a qualquer mudança real de altura do header.
+  if (siteHeader && 'ResizeObserver' in window) {
+    new ResizeObserver(updateLayout).observe(siteHeader);
+  }
 
   // ---------------- Carrossel infinito de projetos ----------------
   // Duplica os cards uma vez (loop CSS via transform: translateX(-50%)).
