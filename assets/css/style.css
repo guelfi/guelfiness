@@ -354,6 +354,16 @@ nav.main-nav a.current { color: var(--accent); font-weight: 700; }
 
 /* ---------- Skills ---------- */
 .skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+/* Só a seção Skills (6 cards) vira 3 colunas x 2 linhas fixas; a grade de
+   Infraestrutura reaproveita a mesma classe mas com 4 cards, então continua
+   com o layout automático (senão sobraria 1 card sozinho numa linha). */
+#skills .skills-grid { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 780px) {
+  #skills .skills-grid { grid-template-columns: 1fr; }
+}
+@media (min-width: 781px) and (max-width: 1000px) {
+  #skills .skills-grid { grid-template-columns: repeat(2, 1fr); }
+}
 .skill-card {
   background: var(--bg-raised);
   border: 1px solid var(--border);
@@ -403,7 +413,26 @@ nav.main-nav a.current { color: var(--accent); font-weight: 700; }
 .filter-btn:hover { color: var(--text); }
 .filter-btn.active { background: var(--gradient); border-color: transparent; color: var(--accent-contrast); }
 
-.project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 22px; }
+/* Carrossel infinito: animação CSS pura (transform + keyframes), não
+   depende de JS pra rolar quadro a quadro — muito mais confiável em
+   celular real do que manipular scrollLeft via requestAnimationFrame. */
+.project-carousel { overflow: hidden; }
+.project-grid {
+  display: flex;
+  gap: 22px;
+  width: max-content;
+  animation: projects-marquee 55s linear infinite;
+}
+.project-carousel:hover .project-grid,
+.project-grid.is-paused { animation-play-state: paused; }
+.project-grid .project-card { flex: 0 0 340px; }
+@keyframes projects-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (max-width: 640px) {
+  .project-grid .project-card { flex: 0 0 280px; }
+}
 .project-card {
   background: var(--bg-raised);
   border: 1px solid var(--border);
@@ -439,10 +468,39 @@ nav.main-nav a.current { color: var(--accent); font-weight: 700; }
 .project-links { display: flex; gap: 10px; margin-top: auto; }
 
 /* ---------- Open Source ---------- */
+/* Ponto de luz neon contornando o card: um "cometa" gira sem parar por
+   trás, só aparecendo na moldura de ~2px ao redor do card (a própria
+   moldura sobrepõe o resto do gradiente). */
+.oss-card-glow {
+  position: relative;
+  border-radius: 19px;
+  padding: 2px;
+  overflow: hidden;
+  isolation: isolate;
+}
+.oss-card-glow::before {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 270deg,
+    var(--accent-2) 300deg,
+    #ffffff 328deg,
+    var(--accent) 345deg,
+    transparent 360deg
+  );
+  animation: oss-comet-spin 4.5s linear infinite;
+}
+@keyframes oss-comet-spin {
+  to { transform: rotate(360deg); }
+}
 .oss-card {
+  position: relative;
+  z-index: 1;
   background: var(--bg-raised);
-  border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: 17px;
   padding: 36px;
   display: grid;
   grid-template-columns: auto 1fr;
@@ -540,7 +598,8 @@ nav.main-nav a.current { color: var(--accent); font-weight: 700; }
 .avail-badge {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
+  font-family: "JetBrains Mono", monospace;
   font-size: 0.82rem;
   font-weight: 700;
   color: var(--success);
@@ -549,7 +608,38 @@ nav.main-nav a.current { color: var(--accent); font-weight: 700; }
   border-radius: 999px;
   margin-bottom: 18px;
 }
-.avail-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--success); }
+.avail-badge::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 6px 1px var(--success);
+  animation: avail-blink 1.3s steps(1, end) infinite;
+}
+@keyframes avail-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.15; }
+}
+/* Efeito "console MS-DOS": texto digitando + cursor piscando */
+.avail-typed {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  vertical-align: bottom;
+  border-right: 2px solid currentColor;
+  width: 0;
+  max-width: 36ch;
+  animation: avail-typing 2.4s steps(36, end) 0.3s forwards,
+             avail-caret 0.8s step-end infinite;
+}
+@keyframes avail-typing {
+  to { width: 36ch; }
+}
+@keyframes avail-caret {
+  0%, 100% { border-color: currentColor; }
+  50% { border-color: transparent; }
+}
 
 footer.site-footer {
   padding: 32px 0;

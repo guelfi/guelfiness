@@ -31,6 +31,21 @@
   window.addEventListener('resize', updateLayout);
   window.addEventListener('load', updateLayout);
 
+  // ---------------- Carrossel infinito de projetos ----------------
+  // Duplica os cards uma vez (loop CSS via transform: translateX(-50%)).
+  // Precisa rodar ANTES do observer de "reveal" logo abaixo, senão a
+  // cópia clonada nunca é observada e fica invisível pra sempre.
+  var projectTrack = document.getElementById('projectGrid');
+  if (projectTrack) {
+    projectTrack.insertAdjacentHTML('beforeend', projectTrack.innerHTML);
+    projectTrack.addEventListener('touchstart', function () {
+      projectTrack.classList.add('is-paused');
+    }, { passive: true });
+    projectTrack.addEventListener('touchend', function () {
+      setTimeout(function () { projectTrack.classList.remove('is-paused'); }, 500);
+    }, { passive: true });
+  }
+
   // ---------------- Setas do menu (mobile) ----------------
   var navScroll = document.getElementById('navScroll');
   var navArrowLeft = document.getElementById('navArrowLeft');
@@ -114,13 +129,14 @@
 
   // ---------------- Project filter ----------------
   var filterButtons = document.querySelectorAll('.filter-btn');
-  var projectCards = document.querySelectorAll('.project-card');
   filterButtons.forEach(function (btn) {
     btn.addEventListener('click', function () {
       filterButtons.forEach(function (b) { b.classList.remove('active'); });
       btn.classList.add('active');
       var filter = btn.getAttribute('data-filter');
-      projectCards.forEach(function (card) {
+      // busca de novo a cada clique (não guarda em cache) pra pegar
+      // também os cards clonados pelo carrossel infinito
+      document.querySelectorAll('.project-card').forEach(function (card) {
         var status = card.getAttribute('data-status');
         var show = filter === 'all' || filter === status;
         card.classList.toggle('hidden', !show);
