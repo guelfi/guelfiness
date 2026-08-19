@@ -49,6 +49,7 @@
   // cópia clonada nunca é observada e fica invisível pra sempre.
   var projectTrack = document.getElementById('projectGrid');
   if (projectTrack) {
+    var projectCount = projectTrack.children.length; // antes de clonar
     projectTrack.insertAdjacentHTML('beforeend', projectTrack.innerHTML);
     var resumeCarousel = function () {
       setTimeout(function () { projectTrack.classList.remove('is-paused'); }, 500);
@@ -61,6 +62,48 @@
     // gesto de navegação) sem nunca disparar touchend — sem isso o
     // carrossel ficava pausado pra sempre a partir desse toque.
     projectTrack.addEventListener('touchcancel', resumeCarousel, { passive: true });
+
+    // ---- Bullets: um por projeto, acendendo em sequência acompanhando o
+    // ciclo do carrossel. Lê a duração real da animação (55s desktop /
+    // 190s mobile) via getComputedStyle pra ficar sempre sincronizado, em
+    // vez de um valor fixo que desalinharia entre os breakpoints.
+    var dotsContainer = document.getElementById('carouselDots');
+    if (dotsContainer && projectCount > 0) {
+      var dots = [];
+      for (var d = 0; d < projectCount; d++) {
+        var dot = document.createElement('span');
+        dot.className = 'dot';
+        dotsContainer.appendChild(dot);
+        dots.push(dot);
+      }
+      // Só uma fração do ciclo é usada pra "correr" os bullets — o resto
+      // fica com todos apagados antes de reiniciar (o "apaga tudo e
+      // começa de novo" pedido, em vez de acender o próximo na hora).
+      var CHASE_FRACTION = 0.8;
+      var elapsedMs = 0;
+      var lastTick = performance.now();
+      var lastActiveIndex = -1;
+      setInterval(function () {
+        var now = performance.now();
+        var paused = getComputedStyle(projectTrack).animationPlayState === 'paused';
+        if (!paused) elapsedMs += now - lastTick;
+        lastTick = now;
+
+        var durationMs = (parseFloat(getComputedStyle(projectTrack).animationDuration) || 55) * 1000;
+        elapsedMs = elapsedMs % durationMs;
+        var fraction = elapsedMs / durationMs;
+
+        var activeIndex = -1;
+        if (fraction < CHASE_FRACTION) {
+          activeIndex = Math.min(projectCount - 1, Math.floor((fraction / CHASE_FRACTION) * projectCount));
+        }
+        if (activeIndex !== lastActiveIndex) {
+          if (lastActiveIndex >= 0 && dots[lastActiveIndex]) dots[lastActiveIndex].classList.remove('is-lit');
+          if (activeIndex >= 0 && dots[activeIndex]) dots[activeIndex].classList.add('is-lit');
+          lastActiveIndex = activeIndex;
+        }
+      }, 150);
+    }
   }
 
   // ---------------- Setas do menu (mobile) ----------------

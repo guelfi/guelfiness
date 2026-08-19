@@ -530,6 +530,30 @@ nav.main-nav a.current { color: var(--accent); font-weight: 700; border-color: v
      lento só nas telas estreitas pra compensar. */
   .project-grid { animation-duration: 190s; }
 }
+
+/* Bullets abaixo do carrossel: um por projeto (não por card clonado),
+   acesos em sequência acompanhando o ciclo da animação — controlado via
+   JS (assets/js/main.js), que lê a duração real da animação do carrossel
+   pra ficar sincronizado com qualquer velocidade (desktop/mobile). */
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  margin-top: 22px;
+}
+.carousel-dots .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--border);
+  opacity: 1;
+  transition: background 0.35s ease, transform 0.35s ease;
+}
+.carousel-dots .dot.is-lit {
+  background: var(--accent);
+  transform: scale(1.3);
+}
 .project-card {
   background: var(--bg-raised);
   border: 1px solid var(--border);
