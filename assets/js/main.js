@@ -67,16 +67,29 @@
     updateNavArrows();
   }
 
-  // ---------------- Centraliza a opção clicada no menu (mobile) ----------------
+  // ---------------- Clique no menu: rola a página + centraliza (mobile) ----------------
+  // Antes dependia do comportamento nativo do <a href="#..."> pra rolar a
+  // página, mais a centralização do nav-scroll rodando em paralelo por
+  // conta própria — em alguns navegadores mobile essas duas rolagens
+  // concorrentes ficavam inconsistentes (seção errada, menu não
+  // centralizava). Agora tudo parte de um único fluxo controlado por JS.
+  var NAV_MOBILE_BREAKPOINT = 960;
   if (navScroll) {
-    var NAV_MOBILE_BREAKPOINT = 960;
     navScroll.querySelectorAll('a').forEach(function (link) {
-      link.addEventListener('click', function () {
-        if (window.innerWidth >= NAV_MOBILE_BREAKPOINT) return; // só no mobile
-        var navRect = navScroll.getBoundingClientRect();
-        var linkRect = link.getBoundingClientRect();
-        var delta = (linkRect.left + linkRect.width / 2) - (navRect.left + navRect.width / 2);
-        navScroll.scrollTo({ left: navScroll.scrollLeft + delta, behavior: 'smooth' });
+      link.addEventListener('click', function (e) {
+        var targetId = link.getAttribute('href');
+        var targetEl = targetId && targetId.charAt(0) === '#' ? document.querySelector(targetId) : null;
+        if (targetEl) {
+          e.preventDefault();
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          if (history.pushState) history.pushState(null, '', targetId);
+        }
+        if (window.innerWidth < NAV_MOBILE_BREAKPOINT) {
+          var navRect = navScroll.getBoundingClientRect();
+          var linkRect = link.getBoundingClientRect();
+          var delta = (linkRect.left + linkRect.width / 2) - (navRect.left + navRect.width / 2);
+          navScroll.scrollTo({ left: navScroll.scrollLeft + delta, behavior: 'smooth' });
+        }
       });
     });
   }
@@ -96,14 +109,33 @@
       });
     }
 
+    // Guarda o estado de TODAS as seções intersectando no momento (não só
+    // as que mudaram neste lote) e sempre escolhe a mais próxima do topo —
+    // evita a seção errada "ganhar" só por ter sido a última processada.
+    var intersecting = {};
+    function pickCurrent() {
+      var bestId = null, bestDist = Infinity;
+      Object.keys(intersecting).forEach(function (id) {
+        var d = Math.abs(intersecting[id]);
+        if (d < bestDist) { bestDist = d; bestId = id; }
+      });
+      if (bestId) setCurrent(bestId);
+    }
+
     var spyObserver = null;
     function initSpy() {
       if (spyObserver) spyObserver.disconnect();
+      intersecting = {};
       var headerH = siteHeader ? siteHeader.offsetHeight : 0;
       spyObserver = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
-          if (entry.isIntersecting) setCurrent(entry.target.id);
+          if (entry.isIntersecting) {
+            intersecting[entry.target.id] = entry.boundingClientRect.top;
+          } else {
+            delete intersecting[entry.target.id];
+          }
         });
+        pickCurrent();
       }, { rootMargin: '-' + (headerH + 4) + 'px 0px -70% 0px', threshold: 0 });
       sections.forEach(function (s) { spyObserver.observe(s); });
     }
