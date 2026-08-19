@@ -156,6 +156,52 @@
     });
   }
 
+  // ---------------- Efeito de digitação humana (badge Contato) ----------------
+  // Timing aleatório por caractere (não steps() uniforme do CSS) pra
+  // parecer alguém digitando de verdade, com pausas maiores nos espaços.
+  (function () {
+    var el = document.getElementById('availTyped');
+    if (!el) return;
+    var fullText = el.textContent;
+    el.textContent = '';
+
+    function rand(min, max) { return min + Math.random() * (max - min); }
+
+    function typeLoop() {
+      var i = 0;
+      function typeChar() {
+        if (i < fullText.length) {
+          i++;
+          el.textContent = fullText.slice(0, i);
+          var justTyped = fullText[i - 1];
+          var delay = rand(55, 135);
+          if (justTyped === ' ') delay += rand(70, 160);
+          else if (Math.random() < 0.08) delay += rand(120, 260); // hesitação ocasional
+          setTimeout(typeChar, delay);
+        } else {
+          setTimeout(deleteLoop, 2700); // segura o texto completo antes de apagar
+        }
+      }
+      typeChar();
+    }
+
+    function deleteLoop() {
+      var i = fullText.length;
+      function delChar() {
+        if (i > 0) {
+          i--;
+          el.textContent = fullText.slice(0, i);
+          setTimeout(delChar, rand(22, 48));
+        } else {
+          setTimeout(typeLoop, 550); // pausa vazia antes de recomeçar
+        }
+      }
+      delChar();
+    }
+
+    typeLoop();
+  })();
+
   // ---------------- Footer year ----------------
   var yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();

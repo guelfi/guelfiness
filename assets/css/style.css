@@ -625,25 +625,17 @@ nav.main-nav a.current { color: var(--accent); font-weight: 700; }
   50%, 100% { opacity: 0.15; }
 }
 /* Efeito "console MS-DOS": digita, segura, apaga, repete — em loop
-   continuo (como as mensagens rotativas no rodapé do allugme.online),
-   nao so uma vez ao carregar a pagina. */
+   continuo (como as mensagens rotativas no rodapé do allugme.online).
+   O texto em si é digitado via JS (timing aleatório por caractere,
+   pra parecer digitação humana de verdade — steps() do CSS é sempre
+   perfeitamente uniforme, então trocamos). Aqui só o cursor pisca. */
 .avail-typed {
   display: inline-block;
-  overflow: hidden;
   white-space: nowrap;
   vertical-align: bottom;
   border-right: 2px solid currentColor;
-  width: 0;
-  max-width: 36ch;
-  animation: avail-typing-loop 6.5s steps(36, end) infinite,
-             avail-caret 0.8s step-end infinite;
-}
-@keyframes avail-typing-loop {
-  0% { width: 0; }
-  24% { width: 36ch; }
-  70% { width: 36ch; }
-  92% { width: 0; }
-  100% { width: 0; }
+  min-height: 1em;
+  animation: avail-caret 0.8s step-end infinite;
 }
 @keyframes avail-caret {
   0%, 100% { border-color: currentColor; }
