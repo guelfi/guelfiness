@@ -191,6 +191,7 @@
   (function () {
     var scrollThumb = document.getElementById('scrollThumb');
     var scrollTrack = document.querySelector('.scroll-track');
+    var scrollPercent = document.getElementById('scrollPercent');
     if (!scrollThumb || !scrollTrack) return;
     var thumbTicking = false;
     function updateScrollThumb() {
@@ -202,8 +203,14 @@
       var progress = scrollableHeight > 0 ? window.scrollY / scrollableHeight : 0;
       var thumbHeight = Math.max(20, (viewportHeight / doc.scrollHeight) * trackHeight);
       var maxThumbTop = trackHeight - thumbHeight;
+      var thumbTop = progress * maxThumbTop;
       scrollThumb.style.height = thumbHeight + 'px';
-      scrollThumb.style.top = (progress * maxThumbTop) + 'px';
+      scrollThumb.style.top = thumbTop + 'px';
+      // Percentual "grudado" no meio do thumb, acompanhando ele.
+      if (scrollPercent) {
+        scrollPercent.style.top = (thumbTop + thumbHeight / 2) + 'px';
+        scrollPercent.textContent = Math.round(progress * 100) + '%';
+      }
     }
     function onThumbScroll() {
       if (!thumbTicking) {

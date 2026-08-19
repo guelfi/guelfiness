@@ -143,6 +143,22 @@ main { flex: 1 0 auto; }
   opacity: 0.4;
   border-radius: 3px;
 }
+/* Percentual "apoiado" na barra: texto deitado (letras de lado), grudado
+   ao lado da bolinha/thumb, acompanhando ela conforme rola a página. */
+.scroll-percent {
+  position: absolute;
+  right: 11px;
+  writing-mode: vertical-rl;
+  transform: translateY(-50%);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+  opacity: 0.7;
+  white-space: nowrap;
+  pointer-events: none;
+}
 
 img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
