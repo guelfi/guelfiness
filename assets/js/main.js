@@ -7,18 +7,29 @@
   // ---------------- Scroll offset (header fixo, 2 linhas) ----------------
   var siteHeader = document.querySelector('.site-header');
   var siteFooter = document.querySelector('.site-footer');
+  var contatoSection = document.getElementById('contato');
   function updateScrollOffset() {
     if (!siteHeader) return;
-    var offset = siteHeader.offsetHeight + 12;
-    root.style.scrollPaddingTop = offset + 'px';
-    // Garante espaço suficiente abaixo da última seção (Contato) para que
-    // ela consiga rolar até ficar colada no header — sem isso, o navegador
-    // bate no fim da página antes de completar o ajuste.
-    if (siteFooter) siteFooter.style.paddingBottom = offset + 'px';
+    root.style.scrollPaddingTop = (siteHeader.offsetHeight + 12) + 'px';
   }
-  updateScrollOffset();
-  window.addEventListener('resize', updateScrollOffset);
-  window.addEventListener('load', updateScrollOffset);
+  // A seção Contato (última da página) recebe altura mínima igual ao
+  // espaço restante da viewport abaixo do header. Isso garante ao mesmo
+  // tempo que (a) sempre há espaço suficiente pra ela rolar coladinha no
+  // header, igual as outras seções, e (b) o rodapé sempre aparece
+  // exatamente no fim da tela, sem sobrar vão em branco nem precisar
+  // de padding artificial. Se o conteúdo da seção já for mais alto que
+  // isso, o min-height não tem efeito nenhum.
+  function updateContatoMinHeight() {
+    if (!contatoSection || !siteHeader) return;
+    contatoSection.style.minHeight = (window.innerHeight - siteHeader.offsetHeight) + 'px';
+  }
+  function updateLayout() {
+    updateScrollOffset();
+    updateContatoMinHeight();
+  }
+  updateLayout();
+  window.addEventListener('resize', updateLayout);
+  window.addEventListener('load', updateLayout);
 
   // ---------------- Setas do menu (mobile) ----------------
   var navScroll = document.getElementById('navScroll');
@@ -54,6 +65,36 @@
       });
     });
   }
+
+  // ---------------- Seção ativa no menu (scrollspy) ----------------
+  // Marca com destaque (cor de fonte, e borda no mobile) o link do menu
+  // correspondente à seção visível no topo da área útil (logo abaixo do
+  // header fixo), conforme o usuário rola a página.
+  (function () {
+    var sections = document.querySelectorAll('main section[id]');
+    var navLinks = document.querySelectorAll('.main-nav a');
+    if (!sections.length || !navLinks.length || !('IntersectionObserver' in window)) return;
+
+    function setCurrent(id) {
+      navLinks.forEach(function (a) {
+        a.classList.toggle('current', a.getAttribute('href') === '#' + id);
+      });
+    }
+
+    var spyObserver = null;
+    function initSpy() {
+      if (spyObserver) spyObserver.disconnect();
+      var headerH = siteHeader ? siteHeader.offsetHeight : 0;
+      spyObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) setCurrent(entry.target.id);
+        });
+      }, { rootMargin: '-' + (headerH + 4) + 'px 0px -70% 0px', threshold: 0 });
+      sections.forEach(function (s) { spyObserver.observe(s); });
+    }
+    initSpy();
+    window.addEventListener('resize', initSpy);
+  })();
 
   // ---------------- Theme toggle ----------------
   var themeToggle = document.getElementById('themeToggle');

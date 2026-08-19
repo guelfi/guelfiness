@@ -206,6 +206,11 @@ nav.main-nav a {
   transition: color 0.15s ease, background 0.15s ease;
 }
 nav.main-nav a:hover { color: var(--text); background: var(--bg-raised); }
+nav.main-nav a.current { color: var(--accent); font-weight: 700; }
+@media (max-width: 959px) {
+  nav.main-nav a { border: 1.5px solid transparent; }
+  nav.main-nav a.current { border-color: var(--accent); }
+}
 
 .header-actions { display: flex; align-items: center; gap: 10px; }
 
