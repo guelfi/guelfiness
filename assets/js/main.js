@@ -91,6 +91,16 @@
   // concorrentes ficavam inconsistentes (seção errada, menu não
   // centralizava). Agora tudo parte de um único fluxo controlado por JS.
   var NAV_MOBILE_BREAKPOINT = 960;
+  // Centraliza um link do menu dentro da faixa rolável (mobile). Também é
+  // chamada pelo scrollspy abaixo — sem isso, rolar a página naturalmente
+  // (sem clicar no menu) marcava o item certo, mas ele podia ficar fora
+  // da faixa visível do menu, sem "acompanhar" a seção sendo vista.
+  function centerNavLink(link) {
+    var navRect = navScroll.getBoundingClientRect();
+    var linkRect = link.getBoundingClientRect();
+    var delta = (linkRect.left + linkRect.width / 2) - (navRect.left + navRect.width / 2);
+    navScroll.scrollTo({ left: navScroll.scrollLeft + delta, behavior: 'smooth' });
+  }
   if (navScroll) {
     navScroll.querySelectorAll('a').forEach(function (link) {
       link.addEventListener('click', function (e) {
@@ -101,12 +111,7 @@
           targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
           if (history.pushState) history.pushState(null, '', targetId);
         }
-        if (window.innerWidth < NAV_MOBILE_BREAKPOINT) {
-          var navRect = navScroll.getBoundingClientRect();
-          var linkRect = link.getBoundingClientRect();
-          var delta = (linkRect.left + linkRect.width / 2) - (navRect.left + navRect.width / 2);
-          navScroll.scrollTo({ left: navScroll.scrollLeft + delta, behavior: 'smooth' });
-        }
+        if (window.innerWidth < NAV_MOBILE_BREAKPOINT) centerNavLink(link);
       });
     });
   }
@@ -130,10 +135,22 @@
     var navLinks = document.querySelectorAll('.main-nav a');
     if (!sections.length || !navLinks.length) return;
 
+    var lastId = null;
     function setCurrent(id) {
+      var changed = id !== lastId;
+      lastId = id;
+      var currentLink = null;
       navLinks.forEach(function (a) {
-        a.classList.toggle('current', a.getAttribute('href') === '#' + id);
+        var isCurrent = a.getAttribute('href') === '#' + id;
+        a.classList.toggle('current', isCurrent);
+        if (isCurrent) currentLink = a;
       });
+      // Rolando a página naturalmente (sem clicar no menu), o item também
+      // precisa acompanhar visualmente no menu mobile — senão a seção
+      // certa fica marcada, mas escondida fora da faixa visível do menu.
+      if (changed && currentLink && navScroll && window.innerWidth < NAV_MOBILE_BREAKPOINT) {
+        centerNavLink(currentLink);
+      }
     }
 
     var ticking = false;
@@ -165,6 +182,39 @@
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
     window.addEventListener('load', updateCurrentSection);
+  })();
+
+  // ---------------- Indicador de rolagem (mobile) ----------------
+  // Barrinha fina e discreta que mostra quanto falta rolar — só aparece
+  // no mobile (via CSS) porque a barra de rolagem nativa some sozinha em
+  // telas de toque, então não dá o mesmo indício visual constante.
+  (function () {
+    var scrollThumb = document.getElementById('scrollThumb');
+    var scrollTrack = document.querySelector('.scroll-track');
+    if (!scrollThumb || !scrollTrack) return;
+    var thumbTicking = false;
+    function updateScrollThumb() {
+      thumbTicking = false;
+      var doc = document.documentElement;
+      var viewportHeight = window.innerHeight;
+      var trackHeight = scrollTrack.clientHeight;
+      var scrollableHeight = doc.scrollHeight - viewportHeight;
+      var progress = scrollableHeight > 0 ? window.scrollY / scrollableHeight : 0;
+      var thumbHeight = Math.max(20, (viewportHeight / doc.scrollHeight) * trackHeight);
+      var maxThumbTop = trackHeight - thumbHeight;
+      scrollThumb.style.height = thumbHeight + 'px';
+      scrollThumb.style.top = (progress * maxThumbTop) + 'px';
+    }
+    function onThumbScroll() {
+      if (!thumbTicking) {
+        thumbTicking = true;
+        requestAnimationFrame(updateScrollThumb);
+      }
+    }
+    updateScrollThumb();
+    window.addEventListener('scroll', onThumbScroll, { passive: true });
+    window.addEventListener('resize', onThumbScroll);
+    window.addEventListener('load', updateScrollThumb);
   })();
 
   // ---------------- Theme toggle ----------------
