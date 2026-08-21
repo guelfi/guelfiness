@@ -3,3 +3,14 @@ services:
     build: .
     container_name: guelfiness-website
     restart: always
+    networks:
+      - projetos-net
+
+# Rede do reverse proxy compartilhado na OCI (www_projetos-net).
+# Declarada como external: o compose não cria nem remove essa rede,
+# apenas conecta este container a ela. Os demais containers que já
+# usam a rede não são afetados.
+networks:
+  projetos-net:
+    external: true
+    name: www_projetos-net
