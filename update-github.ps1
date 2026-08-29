@@ -1,6 +1,6 @@
 ﻿gh auth switch --user guelfi
 
-Write-Host ">> Adicionando alterações..."
+Write-Host ">> Adicionando alterações!!!..."
 git add -A
 
 git diff --cached --quiet
