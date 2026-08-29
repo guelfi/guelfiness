@@ -1,5 +1,9 @@
 ﻿gh auth switch --user guelfi
 
+# Garante a identidade da conta pessoal neste repositório (evita o aviso de auto-configuração do Git)
+git config user.name "Marco Guelfi"
+git config user.email "guelfi@msn.com"
+
 Write-Host ">> Adicionando alterações!!!..."
 git add -A
 
