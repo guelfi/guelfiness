@@ -1,3 +1,41 @@
+# Monta uma sugestão de mensagem de commit a partir dos arquivos staged,
+# categorizando em Adiciona / Atualiza / Remove / Renomeia.
+function Build-CommitSuggestion {
+    $added = @(); $modified = @(); $deleted = @(); $renamed = @()
+
+    $lines = git diff --cached --name-status
+    foreach ($line in $lines) {
+        if ([string]::IsNullOrWhiteSpace($line)) { continue }
+        $fields = $line -split "`t"
+        $status = $fields[0]
+        switch -regex ($status) {
+            '^A' { $added    += $fields[1]; break }
+            '^M' { $modified += $fields[1]; break }
+            '^D' { $deleted  += $fields[1]; break }
+            '^(R|C)' { $renamed += $fields[$fields.Count - 1]; break }
+            default { $modified += $fields[1] }
+        }
+    }
+
+    $parts = @()
+
+    function Add-Description($label, $arr) {
+        if ($arr.Count -eq 0) { return }
+        if ($arr.Count -le 3) {
+            $script:parts += "$label $($arr -join ', ')"
+        } else {
+            $script:parts += "$label $($arr.Count) arquivo(s)"
+        }
+    }
+
+    Add-Description "Adiciona" $added
+    Add-Description "Atualiza" $modified
+    Add-Description "Remove" $deleted
+    Add-Description "Renomeia" $renamed
+
+    return ($parts -join "; ")
+}
+
 # --- 0. Autenticação e identidade ---
 gh auth switch --user guelfi
 
@@ -40,8 +78,19 @@ if ($statusPorcelain) {
     if ($LASTEXITCODE -eq 0) {
         Write-Host ">> Nada ficou de fato staged. Nada a commitar."
     } else {
+        $SUGGESTED_MSG = Build-CommitSuggestion
         Write-Host ""
-        $COMMIT_MSG = Read-Host ">> Digite a mensagem do commit"
+        if ($SUGGESTED_MSG) {
+            Write-Host ">> Sugestão de mensagem de commit:"
+            Write-Host "   `"$SUGGESTED_MSG`""
+            Write-Host ""
+            $COMMIT_MSG = Read-Host ">> Pressione Enter para usar a sugestão, ou digite sua própria mensagem"
+            if ([string]::IsNullOrWhiteSpace($COMMIT_MSG)) {
+                $COMMIT_MSG = $SUGGESTED_MSG
+            }
+        } else {
+            $COMMIT_MSG = Read-Host ">> Digite a mensagem do commit"
+        }
         if ([string]::IsNullOrWhiteSpace($COMMIT_MSG)) {
             Write-Host ">> Mensagem vazia. Commit cancelado. Abortando sincronização."
             exit 1

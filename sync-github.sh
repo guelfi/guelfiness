@@ -1,6 +1,52 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
+# Monta uma sugestão de mensagem de commit a partir dos arquivos staged,
+# categorizando em Adiciona / Atualiza / Remove / Renomeia.
+build_commit_suggestion() {
+    local added=() modified=() deleted=() renamed=()
+    local status rest newpath
+
+    while IFS=$'\t' read -r status rest; do
+        [ -z "$status" ] && continue
+        case "$status" in
+            A) added+=("$rest") ;;
+            M) modified+=("$rest") ;;
+            D) deleted+=("$rest") ;;
+            R*|C*)
+                newpath="${rest##*$'\t'}"
+                renamed+=("$newpath")
+                ;;
+            *) modified+=("$rest") ;;
+        esac
+    done < <(git diff --cached --name-status)
+
+    local parts=()
+    describe() {
+        local label="$1"; shift
+        local arr=("$@")
+        local n=${#arr[@]}
+        [ "$n" -eq 0 ] && return
+        if [ "$n" -le 3 ]; then
+            local joined
+            joined=$(printf '%s, ' "${arr[@]}")
+            joined="${joined%, }"
+            parts+=("$label $joined")
+        else
+            parts+=("$label $n arquivo(s)")
+        fi
+    }
+
+    describe "Adiciona" "${added[@]}"
+    describe "Atualiza" "${modified[@]}"
+    describe "Remove" "${deleted[@]}"
+    describe "Renomeia" "${renamed[@]}"
+
+    local joined_parts
+    printf -v joined_parts '%s; ' "${parts[@]}"
+    echo "${joined_parts%; }"
+}
+
 # --- 0. Autenticação e identidade ---
 gh auth switch --user guelfi
 
@@ -40,8 +86,19 @@ if [ -n "$(git status --porcelain)" ]; then
     if git diff --cached --quiet; then
         echo ">> Nada ficou de fato staged. Nada a commitar."
     else
+        SUGGESTED_MSG=$(build_commit_suggestion)
         echo ""
-        read -rp ">> Digite a mensagem do commit: " COMMIT_MSG
+        if [ -n "$SUGGESTED_MSG" ]; then
+            echo ">> Sugestão de mensagem de commit:"
+            echo "   \"$SUGGESTED_MSG\""
+            echo ""
+            read -rp ">> Pressione Enter para usar a sugestão, ou digite sua própria mensagem: " COMMIT_MSG
+            if [ -z "${COMMIT_MSG// }" ]; then
+                COMMIT_MSG="$SUGGESTED_MSG"
+            fi
+        else
+            read -rp ">> Digite a mensagem do commit: " COMMIT_MSG
+        fi
         if [ -z "${COMMIT_MSG// }" ]; then
             echo ">> Mensagem vazia. Commit cancelado. Abortando sincronização."
             exit 1
