@@ -1,26 +1,25 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-# Pede ao Kimi K2 uma sugestão de mensagem de commit com base no diff staged.
-# Ecoa a sugestão (sem aspas/markdown extra) ou nada, se o kimi não estiver
+# Pede ao Claude uma sugestão de mensagem de commit com base no diff staged.
+# Ecoa a sugestão (sem aspas/markdown extra) ou nada, se o claude não estiver
 # disponível ou não retornar resposta.
-kimi_commit_suggestion() {
-    local kimi_bin=""
-    if command -v kimi >/dev/null 2>&1; then
-        kimi_bin="kimi"
-    elif [ -x "$HOME/.kimi-code/bin/kimi" ]; then
-        # Fallback: o PATH do kimi normalmente só é exportado pelo ~/.bashrc,
-        # que nem toda forma de executar este script carrega.
-        kimi_bin="$HOME/.kimi-code/bin/kimi"
+claude_commit_suggestion() {
+    local claude_bin=""
+    if command -v claude >/dev/null 2>&1; then
+        claude_bin="claude"
+    elif [ -x "$HOME/.local/bin/claude" ]; then
+        # Fallback: caso o PATH do claude não esteja disponível neste shell.
+        claude_bin="$HOME/.local/bin/claude"
     else
-        echo ">> Comando 'kimi' não encontrado (nem no PATH, nem em ~/.kimi-code/bin). Você poderá digitar a mensagem manualmente." >&2
+        echo ">> Comando 'claude' não encontrado (nem no PATH, nem em ~/.local/bin). Você poderá digitar a mensagem manualmente." >&2
         return 0
     fi
 
-    echo ">> Consultando o Kimi K2 ($kimi_bin) para sugerir a mensagem de commit..." >&2
+    echo ">> Consultando o Claude ($claude_bin) para sugerir a mensagem de commit..." >&2
 
-    local kimi_prompt
-    kimi_prompt="Você é um assistente que escreve mensagens de commit git em português, curtas, objetivas e no imperativo (ex: 'Adiciona', 'Corrige', 'Atualiza'). Baseado no diff abaixo, responda APENAS com a mensagem de commit sugerida, em uma única linha de texto puro, sem aspas, sem explicações, sem markdown e sem marcadores/bullets.
+    local claude_prompt
+    claude_prompt="Você é um assistente que escreve mensagens de commit git em português, curtas, objetivas e no imperativo (ex: 'Adiciona', 'Corrige', 'Atualiza'). Baseado no diff abaixo, responda APENAS com a mensagem de commit sugerida, em uma única linha de texto puro, sem aspas, sem explicações, sem markdown e sem marcadores/bullets.
 
 Arquivos alterados:
 $(git diff --cached --name-status)
@@ -28,33 +27,35 @@ $(git diff --cached --name-status)
 Diff completo:
 $(git diff --cached)"
 
-    local kimi_err_file kimi_output kimi_status
-    kimi_err_file=$(mktemp)
-    # Nota: -p já roda em modo não-interativo; --yolo não pode ser combinado
-    # com --prompt (o kimi rejeita com "Cannot combine --prompt with --yolo").
+    local claude_err_file claude_output claude_status
+    claude_err_file=$(mktemp)
+
+    # O prompt vai por stdin (não como argumento): diffs grandes (muitos arquivos/
+    # exclusões) podem passar do limite de tamanho de argumentos do SO (E2BIG).
+    # --allowedTools "": não é preciso nenhuma ferramenta, o diff já vai no prompt.
     if command -v timeout >/dev/null 2>&1; then
-        kimi_output=$(timeout 90 "$kimi_bin" -p "$kimi_prompt" 2>"$kimi_err_file")
+        claude_output=$(printf '%s' "$claude_prompt" | timeout 90 "$claude_bin" -p --allowedTools "" 2>"$claude_err_file")
     else
-        kimi_output=$("$kimi_bin" -p "$kimi_prompt" 2>"$kimi_err_file")
+        claude_output=$(printf '%s' "$claude_prompt" | "$claude_bin" -p --allowedTools "" 2>"$claude_err_file")
     fi
-    kimi_status=$?
+    claude_status=$?
 
     local suggestion
-    suggestion=$(printf '%s\n' "$kimi_output" \
+    suggestion=$(printf '%s\n' "$claude_output" \
         | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' \
         | grep -v '^$' \
         | head -n1 \
         | sed -e 's/^[•*-][[:space:]]*//')
 
     if [ -z "$suggestion" ]; then
-        echo ">> O Kimi não retornou uma sugestão utilizável (código de saída: $kimi_status)." >&2
-        if [ -s "$kimi_err_file" ]; then
-            echo ">> Saída de erro do kimi:" >&2
-            sed 's/^/     /' "$kimi_err_file" >&2
+        echo ">> O Claude não retornou uma sugestão utilizável (código de saída: $claude_status)." >&2
+        if [ -s "$claude_err_file" ]; then
+            echo ">> Saída de erro do claude:" >&2
+            sed 's/^/     /' "$claude_err_file" >&2
         fi
         echo ">> Você poderá digitar a mensagem manualmente." >&2
     fi
-    rm -f "$kimi_err_file"
+    rm -f "$claude_err_file"
 
     echo "$suggestion"
 }
@@ -99,18 +100,18 @@ if [ -n "$(git status --porcelain)" ]; then
         echo ">> Nada ficou de fato staged. Nada a commitar."
     else
         FILE_COUNT=$(git diff --cached --name-only | wc -l | tr -d ' ')
-        if [ "$FILE_COUNT" -gt 15 ]; then
-            echo ">> Mais de 15 arquivos alterados ($FILE_COUNT). Abortando sincronização — revise e faça commits menores antes de rodar o script novamente."
+        if [ "$FILE_COUNT" -gt 50 ]; then
+            echo ">> Mais de 50 arquivos alterados ($FILE_COUNT). Abortando sincronização — revise e faça commits menores antes de rodar o script novamente."
             exit 1
         fi
 
-        SUGGESTED_MSG=$(kimi_commit_suggestion)
+        SUGGESTED_MSG=$(claude_commit_suggestion)
 
         COMMIT_MSG=""
         while [ -z "$COMMIT_MSG" ]; do
             echo ""
             if [ -n "$SUGGESTED_MSG" ]; then
-                echo ">> Sugestão de mensagem de commit (Kimi K2):"
+                echo ">> Sugestão de mensagem de commit (Claude):"
                 echo "   \"$SUGGESTED_MSG\""
             fi
             echo ">> Escolha uma opção:"

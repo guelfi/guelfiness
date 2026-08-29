@@ -1,19 +1,19 @@
-# Pede ao Kimi K2 uma sugestão de mensagem de commit com base no diff staged.
-# Retorna a sugestão (sem aspas/markdown extra) ou string vazia, se o kimi
+# Pede ao Claude uma sugestão de mensagem de commit com base no diff staged.
+# Retorna a sugestão (sem aspas/markdown extra) ou string vazia, se o claude
 # não estiver disponível ou não retornar resposta.
-function Get-KimiCommitSuggestion {
-    $kimiCmd = Get-Command kimi -ErrorAction SilentlyContinue
-    if (-not $kimiCmd) {
-        Write-Host ">> Comando 'kimi' não encontrado. Você poderá digitar a mensagem manualmente."
+function Get-ClaudeCommitSuggestion {
+    $claudeCmd = Get-Command claude -ErrorAction SilentlyContinue
+    if (-not $claudeCmd) {
+        Write-Host ">> Comando 'claude' não encontrado. Você poderá digitar a mensagem manualmente."
         return ""
     }
 
-    Write-Host ">> Consultando o Kimi K2 para sugerir a mensagem de commit..."
+    Write-Host ">> Consultando o Claude para sugerir a mensagem de commit..."
 
     $nameStatus = (git diff --cached --name-status | Out-String).Trim()
     $fullDiff   = (git diff --cached | Out-String).Trim()
 
-    $kimiPrompt = @"
+    $claudePrompt = @"
 Você é um assistente que escreve mensagens de commit git em português, curtas, objetivas e no imperativo (ex: 'Adiciona', 'Corrige', 'Atualiza'). Baseado no diff abaixo, responda APENAS com a mensagem de commit sugerida, em uma única linha de texto puro, sem aspas, sem explicações, sem markdown e sem marcadores/bullets.
 
 Arquivos alterados:
@@ -23,11 +23,12 @@ Diff completo:
 $fullDiff
 "@
 
-    # Nota: -p já roda em modo não-interativo; --yolo não pode ser combinado
-    # com --prompt (o kimi rejeita com "Cannot combine --prompt with --yolo").
+    # O prompt vai por stdin (não como argumento): diffs grandes (muitos arquivos/
+    # exclusões) podem passar do limite de tamanho de argumentos do SO.
+    # --allowedTools "": não é preciso nenhuma ferramenta, o diff já vai no prompt.
     $errFile = [System.IO.Path]::GetTempFileName()
-    $rawOutput = (kimi -p "$kimiPrompt" 2>$errFile | Out-String)
-    $kimiStatus = $LASTEXITCODE
+    $rawOutput = ($claudePrompt | claude -p --allowedTools "" 2>$errFile | Out-String)
+    $claudeStatus = $LASTEXITCODE
 
     $firstLine = ($rawOutput -split "`r?`n" | Where-Object { $_.Trim() -ne "" } | Select-Object -First 1)
     $suggestion = ""
@@ -36,9 +37,9 @@ $fullDiff
     }
 
     if ([string]::IsNullOrWhiteSpace($suggestion)) {
-        Write-Host ">> O Kimi não retornou uma sugestão utilizável (código de saída: $kimiStatus)."
+        Write-Host ">> O Claude não retornou uma sugestão utilizável (código de saída: $claudeStatus)."
         if ((Get-Item $errFile).Length -gt 0) {
-            Write-Host ">> Saída de erro do kimi:"
+            Write-Host ">> Saída de erro do claude:"
             Get-Content $errFile | ForEach-Object { Write-Host "     $_" }
         }
         Write-Host ">> Você poderá digitar a mensagem manualmente."
@@ -93,18 +94,18 @@ if ($statusPorcelain) {
         Write-Host ">> Nada ficou de fato staged. Nada a commitar."
     } else {
         $fileCount = (git diff --cached --name-only | Measure-Object -Line).Lines
-        if ($fileCount -gt 15) {
-            Write-Host ">> Mais de 15 arquivos alterados ($fileCount). Abortando sincronização — revise e faça commits menores antes de rodar o script novamente."
+        if ($fileCount -gt 50) {
+            Write-Host ">> Mais de 50 arquivos alterados ($fileCount). Abortando sincronização — revise e faça commits menores antes de rodar o script novamente."
             exit 1
         }
 
-        $SUGGESTED_MSG = Get-KimiCommitSuggestion
+        $SUGGESTED_MSG = Get-ClaudeCommitSuggestion
 
         $COMMIT_MSG = ""
         while ([string]::IsNullOrWhiteSpace($COMMIT_MSG)) {
             Write-Host ""
             if ($SUGGESTED_MSG) {
-                Write-Host ">> Sugestão de mensagem de commit (Kimi K2):"
+                Write-Host ">> Sugestão de mensagem de commit (Claude):"
                 Write-Host "   `"$SUGGESTED_MSG`""
             }
             Write-Host ">> Escolha uma opção:"
