@@ -195,3 +195,5 @@ if ($AHEAD -gt 0) {
 }
 
 Write-Host ">> Concluído. Repositório local e remoto sincronizados (branch: $BRANCH)."
+
+exit 0

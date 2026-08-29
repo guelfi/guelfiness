@@ -196,3 +196,5 @@ else
 fi
 
 echo ">> Concluído. Repositório local e remoto sincronizados (branch: $BRANCH)."
+
+exit 0
