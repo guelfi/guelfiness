@@ -1,4 +1,4 @@
-gh auth switch --user guelfi
+﻿gh auth switch --user guelfi
 
 Write-Host ">> Adicionando alterações..."
 git add -A
