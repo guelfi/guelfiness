@@ -1,39 +1,53 @@
-# Monta uma sugestão de mensagem de commit a partir dos arquivos staged,
-# categorizando em Adiciona / Atualiza / Remove / Renomeia.
-function Build-CommitSuggestion {
-    $added = @(); $modified = @(); $deleted = @(); $renamed = @()
-
-    $lines = git diff --cached --name-status
-    foreach ($line in $lines) {
-        if ([string]::IsNullOrWhiteSpace($line)) { continue }
-        $fields = $line -split "`t"
-        $status = $fields[0]
-        switch -regex ($status) {
-            '^A' { $added    += $fields[1]; break }
-            '^M' { $modified += $fields[1]; break }
-            '^D' { $deleted  += $fields[1]; break }
-            '^(R|C)' { $renamed += $fields[$fields.Count - 1]; break }
-            default { $modified += $fields[1] }
-        }
+# Pede ao Kimi K2 uma sugestão de mensagem de commit com base no diff staged.
+# Retorna a sugestão (sem aspas/markdown extra) ou string vazia, se o kimi
+# não estiver disponível ou não retornar resposta.
+function Get-KimiCommitSuggestion {
+    $kimiCmd = Get-Command kimi -ErrorAction SilentlyContinue
+    if (-not $kimiCmd) {
+        Write-Host ">> Comando 'kimi' não encontrado. Você poderá digitar a mensagem manualmente."
+        return ""
     }
 
-    $parts = @()
+    Write-Host ">> Consultando o Kimi K2 para sugerir a mensagem de commit..."
 
-    function Add-Description($label, $arr) {
-        if ($arr.Count -eq 0) { return }
-        if ($arr.Count -le 3) {
-            $script:parts += "$label $($arr -join ', ')"
-        } else {
-            $script:parts += "$label $($arr.Count) arquivo(s)"
-        }
+    $nameStatus = (git diff --cached --name-status | Out-String).Trim()
+    $fullDiff   = (git diff --cached | Out-String).Trim()
+
+    $kimiPrompt = @"
+Você é um assistente que escreve mensagens de commit git em português, curtas, objetivas e no imperativo (ex: 'Adiciona', 'Corrige', 'Atualiza'). Baseado no diff abaixo, responda APENAS com a mensagem de commit sugerida, em uma única linha de texto puro, sem aspas, sem explicações, sem markdown e sem marcadores/bullets.
+
+Arquivos alterados:
+$nameStatus
+
+Diff completo:
+$fullDiff
+"@
+
+    # Nota: -p já roda em modo não-interativo; --yolo não pode ser combinado
+    # com --prompt (o kimi rejeita com "Cannot combine --prompt with --yolo").
+    $errFile = [System.IO.Path]::GetTempFileName()
+    $rawOutput = (kimi -p "$kimiPrompt" 2>$errFile | Out-String)
+    $kimiStatus = $LASTEXITCODE
+
+    $firstLine = ($rawOutput -split "`r?`n" | Where-Object { $_.Trim() -ne "" } | Select-Object -First 1)
+    $suggestion = ""
+    if ($firstLine) {
+        $suggestion = $firstLine.Trim() -replace '^[•*-]\s*', ''
     }
 
-    Add-Description "Adiciona" $added
-    Add-Description "Atualiza" $modified
-    Add-Description "Remove" $deleted
-    Add-Description "Renomeia" $renamed
+    if ([string]::IsNullOrWhiteSpace($suggestion)) {
+        Write-Host ">> O Kimi não retornou uma sugestão utilizável (código de saída: $kimiStatus)."
+        if ((Get-Item $errFile).Length -gt 0) {
+            Write-Host ">> Saída de erro do kimi:"
+            Get-Content $errFile | ForEach-Object { Write-Host "     $_" }
+        }
+        Write-Host ">> Você poderá digitar a mensagem manualmente."
+        Remove-Item $errFile -ErrorAction SilentlyContinue
+        return ""
+    }
 
-    return ($parts -join "; ")
+    Remove-Item $errFile -ErrorAction SilentlyContinue
+    return $suggestion
 }
 
 # --- 0. Autenticação e identidade ---
@@ -78,23 +92,53 @@ if ($statusPorcelain) {
     if ($LASTEXITCODE -eq 0) {
         Write-Host ">> Nada ficou de fato staged. Nada a commitar."
     } else {
-        $SUGGESTED_MSG = Build-CommitSuggestion
-        Write-Host ""
-        if ($SUGGESTED_MSG) {
-            Write-Host ">> Sugestão de mensagem de commit:"
-            Write-Host "   `"$SUGGESTED_MSG`""
-            Write-Host ""
-            $COMMIT_MSG = Read-Host ">> Pressione Enter para usar a sugestão, ou digite sua própria mensagem"
-            if ([string]::IsNullOrWhiteSpace($COMMIT_MSG)) {
-                $COMMIT_MSG = $SUGGESTED_MSG
-            }
-        } else {
-            $COMMIT_MSG = Read-Host ">> Digite a mensagem do commit"
-        }
-        if ([string]::IsNullOrWhiteSpace($COMMIT_MSG)) {
-            Write-Host ">> Mensagem vazia. Commit cancelado. Abortando sincronização."
+        $fileCount = (git diff --cached --name-only | Measure-Object -Line).Lines
+        if ($fileCount -gt 15) {
+            Write-Host ">> Mais de 15 arquivos alterados ($fileCount). Abortando sincronização — revise e faça commits menores antes de rodar o script novamente."
             exit 1
         }
+
+        $SUGGESTED_MSG = Get-KimiCommitSuggestion
+
+        $COMMIT_MSG = ""
+        while ([string]::IsNullOrWhiteSpace($COMMIT_MSG)) {
+            Write-Host ""
+            if ($SUGGESTED_MSG) {
+                Write-Host ">> Sugestão de mensagem de commit (Kimi K2):"
+                Write-Host "   `"$SUGGESTED_MSG`""
+            }
+            Write-Host ">> Escolha uma opção:"
+            if ($SUGGESTED_MSG) { Write-Host "   [A] Aceitar a sugestão" }
+            Write-Host "   [E] Escrever minha própria mensagem"
+            Write-Host "   [C] Cancelar o commit"
+            $OPTION = Read-Host ">> Opção"
+            switch -regex ($OPTION) {
+                '^[Aa]' {
+                    if ($SUGGESTED_MSG) {
+                        $COMMIT_MSG = $SUGGESTED_MSG
+                    } else {
+                        Write-Host ">> Não há sugestão disponível para aceitar."
+                    }
+                    break
+                }
+                '^[Ee]' {
+                    $COMMIT_MSG = Read-Host ">> Digite a mensagem do commit"
+                    if ([string]::IsNullOrWhiteSpace($COMMIT_MSG)) {
+                        Write-Host ">> Mensagem vazia. Tente novamente."
+                        $COMMIT_MSG = ""
+                    }
+                    break
+                }
+                '^[Cc]' {
+                    Write-Host ">> Commit cancelado pelo usuário. Abortando sincronização."
+                    exit 1
+                }
+                default {
+                    Write-Host ">> Opção inválida."
+                }
+            }
+        }
+
         git commit -m "$COMMIT_MSG"
     }
 } else {

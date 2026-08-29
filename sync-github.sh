@@ -1,50 +1,62 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-# Monta uma sugestão de mensagem de commit a partir dos arquivos staged,
-# categorizando em Adiciona / Atualiza / Remove / Renomeia.
-build_commit_suggestion() {
-    local added=() modified=() deleted=() renamed=()
-    local status rest newpath
+# Pede ao Kimi K2 uma sugestão de mensagem de commit com base no diff staged.
+# Ecoa a sugestão (sem aspas/markdown extra) ou nada, se o kimi não estiver
+# disponível ou não retornar resposta.
+kimi_commit_suggestion() {
+    local kimi_bin=""
+    if command -v kimi >/dev/null 2>&1; then
+        kimi_bin="kimi"
+    elif [ -x "$HOME/.kimi-code/bin/kimi" ]; then
+        # Fallback: o PATH do kimi normalmente só é exportado pelo ~/.bashrc,
+        # que nem toda forma de executar este script carrega.
+        kimi_bin="$HOME/.kimi-code/bin/kimi"
+    else
+        echo ">> Comando 'kimi' não encontrado (nem no PATH, nem em ~/.kimi-code/bin). Você poderá digitar a mensagem manualmente." >&2
+        return 0
+    fi
 
-    while IFS=$'\t' read -r status rest; do
-        [ -z "$status" ] && continue
-        case "$status" in
-            A) added+=("$rest") ;;
-            M) modified+=("$rest") ;;
-            D) deleted+=("$rest") ;;
-            R*|C*)
-                newpath="${rest##*$'\t'}"
-                renamed+=("$newpath")
-                ;;
-            *) modified+=("$rest") ;;
-        esac
-    done < <(git diff --cached --name-status)
+    echo ">> Consultando o Kimi K2 ($kimi_bin) para sugerir a mensagem de commit..." >&2
 
-    local parts=()
-    describe() {
-        local label="$1"; shift
-        local arr=("$@")
-        local n=${#arr[@]}
-        [ "$n" -eq 0 ] && return
-        if [ "$n" -le 3 ]; then
-            local joined
-            joined=$(printf '%s, ' "${arr[@]}")
-            joined="${joined%, }"
-            parts+=("$label $joined")
-        else
-            parts+=("$label $n arquivo(s)")
+    local kimi_prompt
+    kimi_prompt="Você é um assistente que escreve mensagens de commit git em português, curtas, objetivas e no imperativo (ex: 'Adiciona', 'Corrige', 'Atualiza'). Baseado no diff abaixo, responda APENAS com a mensagem de commit sugerida, em uma única linha de texto puro, sem aspas, sem explicações, sem markdown e sem marcadores/bullets.
+
+Arquivos alterados:
+$(git diff --cached --name-status)
+
+Diff completo:
+$(git diff --cached)"
+
+    local kimi_err_file kimi_output kimi_status
+    kimi_err_file=$(mktemp)
+    # Nota: -p já roda em modo não-interativo; --yolo não pode ser combinado
+    # com --prompt (o kimi rejeita com "Cannot combine --prompt with --yolo").
+    if command -v timeout >/dev/null 2>&1; then
+        kimi_output=$(timeout 90 "$kimi_bin" -p "$kimi_prompt" 2>"$kimi_err_file")
+    else
+        kimi_output=$("$kimi_bin" -p "$kimi_prompt" 2>"$kimi_err_file")
+    fi
+    kimi_status=$?
+
+    local suggestion
+    suggestion=$(printf '%s\n' "$kimi_output" \
+        | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' \
+        | grep -v '^$' \
+        | head -n1 \
+        | sed -e 's/^[•*-][[:space:]]*//')
+
+    if [ -z "$suggestion" ]; then
+        echo ">> O Kimi não retornou uma sugestão utilizável (código de saída: $kimi_status)." >&2
+        if [ -s "$kimi_err_file" ]; then
+            echo ">> Saída de erro do kimi:" >&2
+            sed 's/^/     /' "$kimi_err_file" >&2
         fi
-    }
+        echo ">> Você poderá digitar a mensagem manualmente." >&2
+    fi
+    rm -f "$kimi_err_file"
 
-    describe "Adiciona" "${added[@]}"
-    describe "Atualiza" "${modified[@]}"
-    describe "Remove" "${deleted[@]}"
-    describe "Renomeia" "${renamed[@]}"
-
-    local joined_parts
-    printf -v joined_parts '%s; ' "${parts[@]}"
-    echo "${joined_parts%; }"
+    echo "$suggestion"
 }
 
 # --- 0. Autenticação e identidade ---
@@ -86,23 +98,51 @@ if [ -n "$(git status --porcelain)" ]; then
     if git diff --cached --quiet; then
         echo ">> Nada ficou de fato staged. Nada a commitar."
     else
-        SUGGESTED_MSG=$(build_commit_suggestion)
-        echo ""
-        if [ -n "$SUGGESTED_MSG" ]; then
-            echo ">> Sugestão de mensagem de commit:"
-            echo "   \"$SUGGESTED_MSG\""
-            echo ""
-            read -rp ">> Pressione Enter para usar a sugestão, ou digite sua própria mensagem: " COMMIT_MSG
-            if [ -z "${COMMIT_MSG// }" ]; then
-                COMMIT_MSG="$SUGGESTED_MSG"
-            fi
-        else
-            read -rp ">> Digite a mensagem do commit: " COMMIT_MSG
-        fi
-        if [ -z "${COMMIT_MSG// }" ]; then
-            echo ">> Mensagem vazia. Commit cancelado. Abortando sincronização."
+        FILE_COUNT=$(git diff --cached --name-only | wc -l | tr -d ' ')
+        if [ "$FILE_COUNT" -gt 15 ]; then
+            echo ">> Mais de 15 arquivos alterados ($FILE_COUNT). Abortando sincronização — revise e faça commits menores antes de rodar o script novamente."
             exit 1
         fi
+
+        SUGGESTED_MSG=$(kimi_commit_suggestion)
+
+        COMMIT_MSG=""
+        while [ -z "$COMMIT_MSG" ]; do
+            echo ""
+            if [ -n "$SUGGESTED_MSG" ]; then
+                echo ">> Sugestão de mensagem de commit (Kimi K2):"
+                echo "   \"$SUGGESTED_MSG\""
+            fi
+            echo ">> Escolha uma opção:"
+            [ -n "$SUGGESTED_MSG" ] && echo "   [A] Aceitar a sugestão"
+            echo "   [E] Escrever minha própria mensagem"
+            echo "   [C] Cancelar o commit"
+            read -rp ">> Opção: " OPTION
+            case "$OPTION" in
+                [Aa]*)
+                    if [ -n "$SUGGESTED_MSG" ]; then
+                        COMMIT_MSG="$SUGGESTED_MSG"
+                    else
+                        echo ">> Não há sugestão disponível para aceitar."
+                    fi
+                    ;;
+                [Ee]*)
+                    read -rp ">> Digite a mensagem do commit: " COMMIT_MSG
+                    if [ -z "${COMMIT_MSG// }" ]; then
+                        echo ">> Mensagem vazia. Tente novamente."
+                        COMMIT_MSG=""
+                    fi
+                    ;;
+                [Cc]*)
+                    echo ">> Commit cancelado pelo usuário. Abortando sincronização."
+                    exit 1
+                    ;;
+                *)
+                    echo ">> Opção inválida."
+                    ;;
+            esac
+        done
+
         git commit -m "$COMMIT_MSG"
     fi
 else
