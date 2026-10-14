@@ -13,6 +13,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate public deployment gate
+        run: |
+          bash -n deploy/verify-public.sh
+          python3 deploy/test_verify_public.py
+
       - name: Check required SSH credentials
         id: check_ssh
         env:
@@ -134,18 +139,5 @@ jobs:
         if: steps.check_ssh.outputs.has_ssh == 'true'
 
       - name: External Verification
-        run: |
-          echo "Verificando acesso externo..."
-          sleep 5
-          for i in 1 2 3; do
-            code=$(curl --max-time 10 -s -o /dev/null -w "%{http_code}" https://www.guelfi.com.br/ || echo "000")
-            echo "Teste externo (tentativa $i): HTTP $code"
-            if [ "$code" = "200" ]; then
-              echo "Site acessível externamente!"
-              exit 0
-            fi
-            sleep 5
-          done
-          echo "::warning::Site não retornou HTTP 200 externamente ainda (normal até DNS/SSL serem configurados)."
-        continue-on-error: true
+        run: bash deploy/verify-public.sh
         if: steps.check_ssh.outputs.has_ssh == 'true'
